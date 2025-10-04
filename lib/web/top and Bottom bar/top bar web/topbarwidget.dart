@@ -22,7 +22,7 @@ class TopBarWidget extends StatelessWidget {
     final isDesktop = screenWidth > 1200;
     final isTablet = screenWidth > 768 && screenWidth <= 1200;
     final isMobile = screenWidth <= 768;
-    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 40.0 : 20.0;
+    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 24.0 : 20.0;
 
     // Try to get a home controller for mobile menu state if available and no explicit callbacks provided
     WebHomeController? controller;
@@ -67,6 +67,8 @@ class TopBarWidget extends StatelessWidget {
                         final ctrl = controller!;
                         return Obx(() {
                           final active = ctrl.activeNav.value;
+                          // Responsive spacing based on screen width
+                          final navSpacing = isDesktop ? 40.0 : isTablet ? 20.0 : 15.0;
                           return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                             _navItem('Home', active == 'Home', theme, isDesktop, () {
                               ctrl.setActiveNav('Home');
@@ -75,31 +77,31 @@ class TopBarWidget extends StatelessWidget {
                               Scrollable.ensureVisible(ctrl.exploreKey?.currentContext ?? context, duration: const Duration(milliseconds: 400));
                               if (Get.currentRoute != '/WebHomeScreen') Get.offAllNamed('/WebHomeScreen');
                             }),
-                            SizedBox(width: isDesktop ? 40 : 30),
+                            SizedBox(width: navSpacing),
                             _navItem('Explore', active == 'Explore', theme, isDesktop, () {
                               ctrl.setActiveNav('Explore');
                               if (onNavTap != null) onNavTap!('Explore');
                               ctrl.scrollToExplore();
                             }),
-                            SizedBox(width: isDesktop ? 40 : 30),
+                            SizedBox(width: navSpacing),
                             _navItem('Hot Deals', active == 'Hot Deals', theme, isDesktop, () {
                               ctrl.setActiveNav('Hot Deals');
                               if (onNavTap != null) onNavTap!('Hot Deals');
                               ctrl.scrollToHotDeals();
                             }),
-                            SizedBox(width: isDesktop ? 40 : 30),
+                            SizedBox(width: navSpacing),
                             _navItem('Settings', active == 'Settings', theme, isDesktop, () {
                               ctrl.setActiveNav('Settings');
                               if (onNavTap != null) onNavTap!('Settings');
                               Get.to(() => const SettingsWeb());
                             }),
-                            SizedBox(width: isDesktop ? 40 : 30),
+                            SizedBox(width: navSpacing),
                             _navItem('About', active == 'About', theme, isDesktop, () {
                               ctrl.setActiveNav('About');
                               if (onNavTap != null) onNavTap!('About');
                               ctrl.scrollToAbout();
                             }),
-                            SizedBox(width: isDesktop ? 40 : 30),
+                            SizedBox(width: navSpacing),
                             _navItem('Contact', active == 'Contact', theme, isDesktop, () {
                               ctrl.setActiveNav('Contact');
                               if (onNavTap != null) onNavTap!('Contact');
@@ -108,69 +110,73 @@ class TopBarWidget extends StatelessWidget {
                           ]);
                         });
                       })()
-                    : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        _navItem('Home', activeItem == 'Home', theme, isDesktop, () {
-                            if (onNavTap != null) onNavTap!('Home');
-                          if (controller != null) {
-                            // already on home; just scroll to top (use controller-registered key if available)
-                            Scrollable.ensureVisible(controller.exploreKey?.currentContext ?? context, duration: const Duration(milliseconds: 400));
-                            if (Get.currentRoute != '/WebHomeScreen') Get.offAllNamed('/WebHomeScreen');
-                          } else {
-                            if (Get.currentRoute != '/WebHomeScreen') Get.offAllNamed('/WebHomeScreen');
-                          }
-                        }),
-                        SizedBox(width: isDesktop ? 40 : 30),
-                        _navItem('Explore', activeItem == 'Explore', theme, isDesktop, () {
-                          if (onNavTap != null) onNavTap!('Explore');
-                          if (controller != null) {
-                            controller.scrollToExplore();
-                          } else {
-                            Get.to(() => const ExploreCategoriesScreen());
-                          }
-                        }),
-                        SizedBox(width: isDesktop ? 40 : 30),
-                        _navItem('Hot Deals', activeItem == 'Hot Deals', theme, isDesktop, () {
-                            if (onNavTap != null) onNavTap!('Hot Deals');
-                          if (controller != null) {
-                            controller.scrollToHotDeals();
-                          } else {
-                            // No separate route implemented; fallback to home then scroll
-                            if (Get.currentRoute != '/WebHomeScreen') {
-                              Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToHotDeals': true});
+                    : (() {
+                        // Responsive spacing for fallback navigation
+                        final navSpacing = isDesktop ? 40.0 : isTablet ? 20.0 : 15.0;
+                        return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                          _navItem('Home', activeItem == 'Home', theme, isDesktop, () {
+                              if (onNavTap != null) onNavTap!('Home');
+                            if (controller != null) {
+                              // already on home; just scroll to top (use controller-registered key if available)
+                              Scrollable.ensureVisible(controller.exploreKey?.currentContext ?? context, duration: const Duration(milliseconds: 400));
+                              if (Get.currentRoute != '/WebHomeScreen') Get.offAllNamed('/WebHomeScreen');
                             } else {
-                              // already on home
+                              if (Get.currentRoute != '/WebHomeScreen') Get.offAllNamed('/WebHomeScreen');
                             }
-                          }
-                        }),
-                        SizedBox(width: isDesktop ? 40 : 30),
-                        _navItem('Settings', activeItem == 'Settings', theme, isDesktop, () {
-                          if (onNavTap != null) onNavTap!('Settings');
-                          Get.to(() => const SettingsWeb());
-                        }),
-                        SizedBox(width: isDesktop ? 40 : 30),
-                        _navItem('About', activeItem == 'About', theme, isDesktop, () {
-                          if (onNavTap != null) onNavTap!('About');
-                          if (controller != null) {
-                            controller.scrollToAbout();
-                          } else {
-                            // Navigate to home and request scroll to About after navigation
-                            if (Get.currentRoute != '/WebHomeScreen') {
-                              Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToAbout': true});
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('Explore', activeItem == 'Explore', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('Explore');
+                            if (controller != null) {
+                              controller.scrollToExplore();
+                            } else {
+                              Get.to(() => const ExploreCategoriesScreen());
                             }
-                          }
-                        }),
-                        SizedBox(width: isDesktop ? 40 : 30),
-                        _navItem('Contact', activeItem == 'Contact', theme, isDesktop, () {
-                          if (onNavTap != null) onNavTap!('Contact');
-                          if (controller != null) {
-                            controller.scrollToContact();
-                          } else {
-                            if (Get.currentRoute != '/WebHomeScreen') {
-                              Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToContact': true});
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('Hot Deals', activeItem == 'Hot Deals', theme, isDesktop, () {
+                              if (onNavTap != null) onNavTap!('Hot Deals');
+                            if (controller != null) {
+                              controller.scrollToHotDeals();
+                            } else {
+                              // No separate route implemented; fallback to home then scroll
+                              if (Get.currentRoute != '/WebHomeScreen') {
+                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToHotDeals': true});
+                              } else {
+                                // already on home
+                              }
                             }
-                          }
-                        }),
-                      ])),
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('Settings', activeItem == 'Settings', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('Settings');
+                            Get.to(() => const SettingsWeb());
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('About', activeItem == 'About', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('About');
+                            if (controller != null) {
+                              controller.scrollToAbout();
+                            } else {
+                              // Navigate to home and request scroll to About after navigation
+                              if (Get.currentRoute != '/WebHomeScreen') {
+                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToAbout': true});
+                              }
+                            }
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('Contact', activeItem == 'Contact', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('Contact');
+                            if (controller != null) {
+                              controller.scrollToContact();
+                            } else {
+                              if (Get.currentRoute != '/WebHomeScreen') {
+                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToContact': true});
+                              }
+                            }
+                          }),
+                        ]);
+                      })()), 
 
           if (isMobile)
             Row(mainAxisSize: MainAxisSize.min, children: [IconButton(onPressed: () {}, icon: Icon(Icons.search, color: theme.iconTheme.color, size: 20)), IconButton(onPressed: () {}, icon: Icon(Icons.notifications_outlined, color: theme.iconTheme.color, size: 20))])
@@ -183,6 +189,29 @@ class TopBarWidget extends StatelessWidget {
 
   Widget _navItem(String text, bool isActive, ThemeData theme, bool isDesktop, VoidCallback onTap) {
     final color = isActive ? EventouryColors.tangerine : theme.textTheme.bodyLarge?.color;
-    return GestureDetector(onTap: onTap, child: Text(text, style: TextStyle(fontSize: isDesktop ? 16 : 14, fontWeight: isActive ? FontWeight.w600 : FontWeight.w500, color: color)));
+    final screenWidth = MediaQuery.of(Get.context!).size.width;
+    final isTablet = screenWidth > 768 && screenWidth <= 1200;
+    
+    // More responsive font sizing
+    double fontSize;
+    if (isDesktop) {
+      fontSize = 16;
+    } else if (isTablet) {
+      fontSize = 13; // Smaller font for tablet to fit better
+    } else {
+      fontSize = 14;
+    }
+    
+    return GestureDetector(
+      onTap: onTap, 
+      child: Text(
+        text, 
+        style: TextStyle(
+          fontSize: fontSize, 
+          fontWeight: isActive ? FontWeight.w600 : FontWeight.w500, 
+          color: color
+        )
+      )
+    );
   }
 }

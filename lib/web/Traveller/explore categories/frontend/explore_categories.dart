@@ -23,8 +23,8 @@ class ExploreCategoriesScreen extends StatelessWidget {
   final isTablet = screenWidth > 768 && screenWidth <= 1200;
   final isMobile = screenWidth <= 768;
     
-    // Responsive padding
-    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 40.0 : 20.0;
+    // Improved responsive padding
+    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 40.0 : screenWidth > 600 ? 24.0 : 16.0;
     final verticalPadding = isDesktop ? 40.0 : isTablet ? 30.0 : 20.0;
 
     return Scaffold(
@@ -194,22 +194,22 @@ class ExploreCategoriesScreen extends StatelessWidget {
   final isDesktop = screenWidth > 1200;
   final isTablet = screenWidth > 768 && screenWidth <= 1200;
     
-    // Responsive grid configuration
+    // Improved responsive grid configuration for 13 categories
     int crossAxisCount;
     double childAspectRatio;
     double spacing;
     
     if (isDesktop) {
-      crossAxisCount = 3;
-      childAspectRatio = 1.8;
+      crossAxisCount = 4; // 4 columns on desktop
+      childAspectRatio = 1.2; // Better aspect ratio for content
       spacing = 24;
     } else if (isTablet) {
-      crossAxisCount = 2;
-      childAspectRatio = 1.6;
+      crossAxisCount = 3; // 3 columns on tablet
+      childAspectRatio = 1.1; // Adjusted for better content fit
       spacing = 20;
     } else {
-      crossAxisCount = 1;
-      childAspectRatio = 2.2;
+      crossAxisCount = 2; // 2 columns on mobile
+      childAspectRatio = 0.9; // Taller cards for mobile to fit content
       spacing = 16;
     }
 
@@ -277,59 +277,66 @@ class ExploreCategoriesScreen extends StatelessWidget {
               ),
             ),
             
-            // Content
-            Padding(
-              padding: EdgeInsets.all(isDesktop ? 24 : isTablet ? 20 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    category['title'],
-                    style: TextStyle(
-                      fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: isDesktop ? 12 : 8),
-                  
-                  // Description
-                  Expanded(
-                    child: Text(
-                      category['description'],
+            // Content - improved layout with proper button positioning
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.all(isDesktop ? 20 : isTablet ? 16 : 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title - responsive sizing
+                    Text(
+                      category['title'],
                       style: TextStyle(
-                        fontSize: isDesktop ? 16 : isTablet ? 14 : 13,
-                        color: Colors.white70,
-                        height: 1.4,
+                        fontSize: isDesktop ? 22 : isTablet ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: isDesktop ? 12 : 10),
+                    
+                    // Description - controlled height
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        category['description'],
+                        style: TextStyle(
+                          fontSize: isDesktop ? 15 : isTablet ? 14 : 13,
+                          color: Colors.white70,
+                          height: 1.4,
+                        ),
+                        maxLines: isDesktop ? 4 : isTablet ? 3 : 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                  
-                  SizedBox(height: isDesktop ? 20 : 16),
-                  
-                  // Explore Button
-                  SizedBox(
-                    width: isDesktop ? 110 : isTablet ? 100 : 90,
-                    height: isDesktop ? 40 : isTablet ? 36 : 32,
-                    child: EventouryElevatedButton(
-                      onPressed: () => controller.onCategoryTap(category['title']),
-                      borderRadius: BorderRadius.circular(isDesktop ? 20 : 18),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isDesktop ? 16 : 12,
-                        vertical: isDesktop ? 8 : 6,
-                      ),
-                      child: Text(
-                        'Explore →',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 12 : isTablet ? 11 : 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                    
+                    // Spacer to push button to bottom
+                    const Spacer(flex: 1),
+                    
+                    // Explore Button - bigger and positioned at right bottom
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: EventouryElevatedButton(
+                        onPressed: () => controller.onCategoryTap(category['title']),
+                        borderRadius: BorderRadius.circular(25),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 24 : isTablet ? 20 : 18,
+                          vertical: isDesktop ? 14 : isTablet ? 12 : 10,
+                        ),
+                        child: Text(
+                          'Explore →',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

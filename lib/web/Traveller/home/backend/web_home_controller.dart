@@ -10,12 +10,19 @@ class WebHomeController extends GetxController {
   final RxString activeNav = 'Home'.obs;
 
   final List<String> categories = [
+    'Activities',
+    'Lessons/Classes',
     'Transportation',
+    'Guide',
+    'Accommodation',
+    'Entertainment',
+    'Tourist Attraction Spots',
+    'Fitness and Wellbeing',
+    'Cultural, Heritage, and History',
+    'Tickets',
     'Events',
     'Tour Packages',
-    'Activities',
-    'Guide',
-    'Entertainment'
+    'VIP Protocol'
   ];
 
   final RxList<Map<String, dynamic>> hotDeals = <Map<String, dynamic>>[

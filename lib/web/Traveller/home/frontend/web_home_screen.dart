@@ -412,7 +412,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildExploreSection(WebHomeController controller, ThemeData theme, double screenWidth, BuildContext context) {
     final isDesktop = screenWidth > 1200;
     final isTablet = screenWidth > 768 && screenWidth <= 1200;
-    final isMobile = screenWidth <= 768;
     
     return Column(
       children: [
@@ -443,26 +442,46 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ],
         ),
         SizedBox(height: isDesktop ? 40 : isTablet ? 30 : 20),
-        // Removed Obx since we no longer use selection state
-        isMobile 
-          ? GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: screenWidth <= 360 ? 0.9 : screenWidth <= 480 ? 1.0 : 1.1, // Dynamic aspect ratio
-              children: List.generate(controller.categories.length, (index) {
-                return _buildCategoryCard(controller.categories[index], index, controller, theme, true, context);
-              }),
-            )
-          : Row(
-              children: List.generate(controller.categories.length, (index) {
-                return Expanded(
-                  child: _buildCategoryCard(controller.categories[index], index, controller, theme, false, context),
-                );
-              }),
-            ),
+        // Show all 13 categories in horizontal scroll
+        Container(
+          height: isDesktop ? 240 : isTablet ? 220 : 200,
+          child: Stack(
+            children: [
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: controller.categories.length,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: screenWidth > 1200 ? 220 : screenWidth > 768 ? 200 : 180,
+                    margin: const EdgeInsets.only(right: 16),
+                    child: _buildCategoryCard(controller.categories[index], index, controller, theme, false, context),
+                  );
+                },
+              ),
+              // Right fade indicator for scrolling
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 20,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        theme.scaffoldBackgroundColor.withOpacity(0),
+                        theme.scaffoldBackgroundColor.withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -470,12 +489,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   Widget _buildCategoryCard(String category, int index, WebHomeController controller, ThemeData theme, bool isMobile, BuildContext context) {
     // Map categories to their respective images
     final categoryImages = {
+      'Activities': 'assets/onboarding_images/onboarding_1.jpeg',
+      'Lessons/Classes': 'assets/onboarding_images/onboarding_2.jpeg',
       'Transportation': 'assets/home_screen/transport.jpg',
+      'Guide': 'assets/onboarding_images/onboarding_3.jpeg',
+      'Accommodation': 'assets/onboarding_images/onboarding_4.jpeg',
+      'Entertainment': 'assets/onboarding_images/onboarding_5.jpeg',
+      'Tourist Attraction Spots': 'assets/onboarding_images/onboarding_6.jpeg',
+      'Fitness and Wellbeing': 'assets/onboarding_images/onboarding_1.jpeg',
+      'Cultural, Heritage, and History': 'assets/onboarding_images/onboarding_2.jpeg',
+      'Tickets': 'assets/onboarding_images/onboarding_3.jpeg',
       'Events': 'assets/home_screen/events.jpg',
       'Tour Packages': 'assets/home_screen/tour_packages.jpeg',
-      'Activities': 'assets/onboarding_images/onboarding_1.jpeg',
-      'Guide': 'assets/onboarding_images/onboarding_2.jpeg',
-      'Entertainment': 'assets/onboarding_images/onboarding_3.jpeg',
+      'VIP Protocol': 'assets/onboarding_images/onboarding_4.jpeg',
     };
 
     // Get screen width for responsive sizing
@@ -508,7 +534,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
-          height: isMobile ? 180 : (screenWidth > 1200 ? 220 : 200),
+          height: isMobile ? 180 : double.infinity,
           padding: EdgeInsets.all(cardPadding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -532,17 +558,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
               SizedBox(height: isMobile ? 8 : 12),
               // Text section - fixed height for text
               SizedBox(
-                height: isMobile ? 32 : 36,
+                height: isMobile ? 40 : 44,
                 child: Center(
                   child: Text(
                     category,
                     style: TextStyle(
-                      fontSize: isMobile ? 14 : 16,
+                      fontSize: isMobile ? 12 : 14,
                       fontWeight: FontWeight.w600,
                       color: theme.textTheme.bodyLarge?.color,
                     ),
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

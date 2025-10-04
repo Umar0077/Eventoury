@@ -9,13 +9,15 @@ class BottomBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
-    final isNarrow = screenWidth < 720;
+    
+    // More responsive breakpoint - use mobile layout for tablets and below
+    final isNarrow = screenWidth < 900; // Increased threshold for better responsiveness
 
-  // Use theme colors so the bottom bar adapts to light/dark themes.
-  // Use scaffoldBackgroundColor so the footer blends with page background.
-  final bgColor = theme.scaffoldBackgroundColor; // background of the footer
+    // Use theme colors so the bottom bar adapts to light/dark themes.
+    // Use scaffoldBackgroundColor so the footer blends with page background.
+    final bgColor = theme.scaffoldBackgroundColor; // background of the footer
     final primaryTextColor = theme.colorScheme.onSurface; // main text/icons
-  final secondaryTextColor = theme.colorScheme.onSurface.withOpacity(0.75);
+    final secondaryTextColor = theme.colorScheme.onSurface.withOpacity(0.75);
 
     final leftLinks = Wrap(
       alignment: WrapAlignment.center,
@@ -51,32 +53,64 @@ class BottomBarWidget extends StatelessWidget {
       ],
     );
 
+    // Responsive padding
+    final horizontalPadding = screenWidth > 1200 ? 80.0 : screenWidth > 768 ? 40.0 : 20.0;
+    final verticalPadding = screenWidth > 1200 ? 24.0 : 20.0;
+    
     return Container(
       color: bgColor,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
       child: isNarrow
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Links
-                leftLinks,
-                const SizedBox(height: 12),
-                // Center copyright
-                center,
-                const SizedBox(height: 12),
-                // Icons centered
+                // Links with responsive spacing
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: screenWidth > 600 ? 16 : 12,
+                  children: [
+                    _linkText(context, 'Privacy Policy', onTap: () {}),
+                    _linkText(context, 'Terms and Conditions', onTap: () {}),
+                  ],
+                ),
+                SizedBox(height: screenWidth > 600 ? 16 : 12),
+                // Center copyright with responsive text
+                Text(
+                  '© ${DateTime.now().year} Eventoury. All Rights Reserved.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: primaryTextColor, 
+                    fontWeight: FontWeight.w600,
+                    fontSize: screenWidth > 600 ? 14 : 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenWidth > 600 ? 16 : 12),
+                // Icons centered with responsive spacing
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   _iconCircle(FontAwesomeIcons.linkedin, onTap: () {}),
-                  const SizedBox(width: 8),
+                  SizedBox(width: screenWidth > 600 ? 12 : 8),
                   _iconCircle(FontAwesomeIcons.instagram, onTap: () {}),
-                  const SizedBox(width: 8),
+                  SizedBox(width: screenWidth > 600 ? 12 : 8),
                   _iconCircle(FontAwesomeIcons.tiktok, onTap: () {}),
                 ]),
-                const SizedBox(height: 8),
-                Text('info@eventoury.com', style: theme.textTheme.bodySmall?.copyWith(color: secondaryTextColor)),
+                SizedBox(height: screenWidth > 600 ? 10 : 8),
+                Text(
+                  'info@eventoury.com', 
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: secondaryTextColor,
+                    fontSize: screenWidth > 600 ? 12 : 10,
+                  )
+                ),
               ],
             )
-          : Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [leftLinks, center, right]),
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+              children: [
+                Expanded(flex: 2, child: leftLinks),
+                Expanded(flex: 3, child: center),
+                Expanded(flex: 2, child: Align(alignment: Alignment.centerRight, child: right)),
+              ]
+            ),
     );
   }
 
