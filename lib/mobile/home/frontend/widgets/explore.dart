@@ -29,32 +29,71 @@ class ExploreSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SizedBox(
-            height: 120,
+            height: 140,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: 3,
+              itemCount: 13,
               itemBuilder: (context, index) {
                 final categories = [
                   {
-                    'name': 'Transport',
+                    'name': 'Activities',
+                    'image': 'assets/home_screen/events.jpg',
+                  },
+                  {
+                    'name': 'Lessons /\nClasses',
                     'image': 'assets/home_screen/transport.jpg',
+                  },
+                  {
+                    'name': 'Transportation',
+                    'image': 'assets/home_screen/transport.jpg',
+                  },
+                  {
+                    'name': 'Guide',
+                    'image': 'assets/home_screen/tour_packages.jpeg',
+                  },
+                  {
+                    'name': 'Accommodation',
+                    'image': 'assets/home_screen/tour_packages.jpeg',
+                  },
+                  {
+                    'name': 'Entertainment',
+                    'image': 'assets/home_screen/events.jpg',
+                  },
+                  {
+                    'name': 'Tourist\nAttraction\nSpots',
+                    'image': 'assets/home_screen/tour_packages.jpeg',
+                  },
+                  {
+                    'name': 'Fitness &\nWellbeing',
+                    'image': 'assets/home_screen/events.jpg',
+                  },
+                  {
+                    'name': 'Cultural &\nHeritage &\nHistory',
+                    'image': 'assets/home_screen/tour_packages.jpeg',
+                  },
+                  {
+                    'name': 'Tickets',
+                    'image': 'assets/home_screen/events.jpg',
                   },
                   {
                     'name': 'Events',
                     'image': 'assets/home_screen/events.jpg',
                   },
                   {
-                    'name': 'Tour Packages',
+                    'name': 'Tour\nPackages',
                     'image': 'assets/home_screen/tour_packages.jpeg',
+                  },
+                  {
+                    'name': 'VIP Protocol',
+                    'image': 'assets/home_screen/transport.jpg',
                   },
                 ];
                 return CategoryCard(
                   category: categories[index],
                   onTap: () {
-                    // Navigate to detail screen inside nested navigator (id: 1)
                     Get.to(
-                          () => CategoriesList(category: categories[index]),
-                      id: 1, // important for nested navigation
+                      () => CategoriesList(category: categories[index]),
+                      id: 1,
                     );
                   },
                 );
@@ -76,39 +115,50 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 7.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: GestureDetector(
         onTap: onTap,
-        child: Column(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Image.asset('assets/home_screen/circle (1).png',
-                    width: 90, height: 90),
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: AssetImage(category['image']),
-                      fit: BoxFit.cover,
+        child: SizedBox(
+          width: 90,
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.asset('assets/home_screen/circle (1).png',
+                      width: 90, height: 90),
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: AssetImage(category['image']),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 42,
+                child: Text(
+                  category['name'],
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              category['name'],
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w700),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

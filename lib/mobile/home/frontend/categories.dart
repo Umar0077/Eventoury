@@ -10,8 +10,44 @@ class Categories extends StatelessWidget {
   Widget build(BuildContext context) {
     final categories = [
       {
-        'name': 'Transport',
+        'name': 'Activities',
+        'image': 'assets/home_screen/events.jpg',
+      },
+      {
+        'name': 'Lessons / Classes',
         'image': 'assets/home_screen/transport.jpg',
+      },
+      {
+        'name': 'Transportation',
+        'image': 'assets/home_screen/transport.jpg',
+      },
+      {
+        'name': 'Guide',
+        'image': 'assets/home_screen/tour_packages.jpeg',
+      },
+      {
+        'name': 'Accommodation',
+        'image': 'assets/home_screen/tour_packages.jpeg',
+      },
+      {
+        'name': 'Entertainment',
+        'image': 'assets/home_screen/events.jpg',
+      },
+      {
+        'name': 'Tourist Attraction Spots',
+        'image': 'assets/home_screen/tour_packages.jpeg',
+      },
+      {
+        'name': 'Fitness & Wellbeing',
+        'image': 'assets/home_screen/events.jpg',
+      },
+      {
+        'name': 'Cultural & Heritage & History',
+        'image': 'assets/home_screen/tour_packages.jpeg',
+      },
+      {
+        'name': 'Tickets',
+        'image': 'assets/home_screen/events.jpg',
       },
       {
         'name': 'Events',
@@ -22,28 +58,8 @@ class Categories extends StatelessWidget {
         'image': 'assets/home_screen/tour_packages.jpeg',
       },
       {
-        'name': 'Activities',
-        'image': 'assets/home_screen/tour_packages.jpeg',
-      },
-      {
-        'name': 'Guides',
-        'image': 'assets/home_screen/tour_packages.jpeg',
-      },
-      {
-        'name': 'Entertainment',
-        'image': 'assets/home_screen/tour_packages.jpeg',
-      },
-      {
-        'name': 'Hotels',
-        'image': 'assets/home_screen/events.jpg',
-      },
-      {
-        'name': 'Restaurants',
-        'image': 'assets/home_screen/events.jpg',
-      },
-      {
-        'name': 'Activities',
-        'image': 'assets/home_screen/events.jpg',
+        'name': 'VIP Protocol',
+        'image': 'assets/home_screen/transport.jpg',
       },
     ];
 
@@ -72,11 +88,11 @@ class Categories extends StatelessWidget {
               GridView.builder(
                 shrinkWrap: true, // Important for SingleChildScrollView
                 physics: const NeverScrollableScrollPhysics(), // disable GridView scrolling
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2, // 2 columns
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 1,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: MediaQuery.of(context).size.width > 400 ? 0.95 : 0.9, // Responsive aspect ratio
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
@@ -111,39 +127,62 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              'assets/home_screen/circle (1).png',
-              width: 120,
-              height: 120,
-            ),
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage(category['image']),
-                  fit: BoxFit.cover,
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth > 400;
+    
+    // Responsive sizing
+    final outerCircleSize = isLargeScreen ? 130.0 : 120.0;
+    final innerCircleSize = isLargeScreen ? 100.0 : 90.0;
+    final fontSize = isLargeScreen ? 14.0 : 13.0;
+    
+    return Container(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  'assets/home_screen/circle (1).png',
+                  width: outerCircleSize,
+                  height: outerCircleSize,
                 ),
-              ),
+                Container(
+                  width: innerCircleSize,
+                  height: innerCircleSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: AssetImage(category['image']),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          category['name'],
-          style: Theme.of(context)
-              .textTheme
-              .labelLarge
-              ?.copyWith(fontWeight: FontWeight.w700),
-          textAlign: TextAlign.center,
-        ),
-      ],
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            flex: 1,
+            child: Text(
+              category['name'],
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium
+                  ?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: fontSize,
+                  ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
