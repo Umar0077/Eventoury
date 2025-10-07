@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:eventoury/web/Vendor/vendor_shell_controller.dart';
+import 'package:eventoury/Admin Mobile App/Admin Home Screens/Dashboard/admin_dashboard.dart';
 
 class VendorSidebar extends StatefulWidget {
   const VendorSidebar({super.key});
@@ -256,7 +257,7 @@ class _VendorSidebarState extends State<VendorSidebar> {
               // shell route and then set the index to ensure the sidebar
               // remains the same instance and only the right-side content
               // switches.
-              await Get.offAllNamed('/Vendor');
+              Get.offAll(() => const AdminDashboard());
               try {
                 final ctrl2 = Get.find<VendorShellController>();
                 ctrl2.setIndex(0);
@@ -269,7 +270,7 @@ class _VendorSidebarState extends State<VendorSidebar> {
               final ctrl = Get.find<VendorShellController>();
               ctrl.setIndex(1);
             } catch (_) {
-              await Get.offAllNamed('/Vendor');
+              Get.offAll(() => const AdminDashboard());
               try {
                 final ctrl2 = Get.find<VendorShellController>();
                 ctrl2.setIndex(1);
@@ -283,7 +284,7 @@ class _VendorSidebarState extends State<VendorSidebar> {
               final ctrl = Get.find<VendorShellController>();
               ctrl.setIndex(4);
             } catch (_) {
-              await Get.offAllNamed('/Vendor');
+              Get.offAll(() => const AdminDashboard());
               try {
                 final ctrl2 = Get.find<VendorShellController>();
                 ctrl2.setIndex(4);
@@ -296,7 +297,7 @@ class _VendorSidebarState extends State<VendorSidebar> {
               final ctrl = Get.find<VendorShellController>();
               ctrl.setIndex(5);
             } catch (_) {
-              await Get.offAllNamed('/Vendor');
+              Get.offAll(() => const AdminDashboard());
               try {
                 final ctrl2 = Get.find<VendorShellController>();
                 ctrl2.setIndex(5);

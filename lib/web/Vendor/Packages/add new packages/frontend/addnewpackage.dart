@@ -1,4 +1,5 @@
 import 'package:eventoury/web/Vendor/vendor_layout.dart';
+import 'package:eventoury/Admin Mobile App/Admin Home Screens/Dashboard/admin_dashboard.dart';
 import 'package:eventoury/web/Vendor/vendor_shell_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -90,7 +91,7 @@ class _AddNewPackageScreenState extends State<AddNewPackageScreen> {
                     // go back to packages list (index 6)
                     ctrl.setIndex(6);
                   } catch (_) {
-                    await Get.offAllNamed('/Vendor');
+                    Get.offAll(() => const AdminDashboard());
                     try {
                       final ctrl2 = Get.find<VendorShellController>();
                       ctrl2.setIndex(6);

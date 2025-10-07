@@ -1,4 +1,5 @@
 import 'package:eventoury/web/Vendor/vendor_layout.dart';
+import 'package:eventoury/Admin Mobile App/Admin Home Screens/Dashboard/admin_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:eventoury/web/Vendor/vendor_shell_controller.dart';
@@ -184,7 +185,7 @@ class _ReviewsVendorContentState extends State<ReviewsVendorContent> {
                   ctrl.setIndex(0);
                 } catch (e) {
                   // fallback: navigate to vendor shell then set index
-                  Get.offAllNamed('/Vendor');
+                  Get.offAll(() => const AdminDashboard());
                   Future.delayed(const Duration(milliseconds: 150), () {
                     try {
                       final ctrl2 = Get.find<VendorShellController>();

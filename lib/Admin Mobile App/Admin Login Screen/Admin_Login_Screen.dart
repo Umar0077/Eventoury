@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
 import 'package:eventoury/utils/constants/colors.dart';
 import 'package:eventoury/utils/theme/elevated_button_theme.dart';
-import '../../vendor/home/frontend/home.dart';
-import '../backend/login_controller.dart';
-import 'signup_screen.dart';
-import '../../../Admin Mobile App/Admin Login Screen/Admin_Login_Screen.dart';
+import 'package:get/get.dart';
+import '../Admin Home Screens/Dashboard/admin_dashboard.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class AdminLoginScreen extends StatelessWidget {
+  const AdminLoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final LoginController c = Get.put(LoginController());
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SingleChildScrollView(
@@ -22,46 +18,40 @@ class LoginScreen extends StatelessWidget {
           children: [
             SizedBox(height: 80),
             Form(
-              key: c.formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 8),
                   Center(
                     child: Text(
-                      'Welcome Back',
+                      'Welcome Back Admin',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
-                    controller: c.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       hintText: 'Email',
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
-                    validator: c.validateEmail,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    controller: c.passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       hintText: 'Password',
                       labelText: 'Password',
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
-                    validator: c.validatePassword,
                   ),
                   const SizedBox(height: 24),
-                  Obx(
-                    () => EventouryElevatedButton(
-                      onPressed: c.isSubmitting.value ? null : c.submit,
-                      isLoading: c.isSubmitting.value,
-                      child: const Text('Login'),
-                    ),
+                  EventouryElevatedButton(
+                    onPressed: () {
+                      Get.to(() => const AdminDashboard());
+                    },
+                    child: const Text('Login'),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -78,7 +68,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => Get.to(() => SignUpScreen()),
+                        onPressed: () {},
                         child: Text(
                           'Sign Up',
                           style: TextStyle(
@@ -122,33 +112,6 @@ class LoginScreen extends StatelessWidget {
                     icon: Icons.apple,
                     label: 'Continue with Apple',
                     onPressed: () {},
-                  ),
-                  // Vendor and Admin login links grouped and styled
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () { Get.to(() => VendorHomeScreen()); },
-                        child: Text(
-                          'Vendor Login!',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Prominent Admin Login button (pill-shaped) for visibility
-                      Center(
-                        child: EventouryElevatedButton(
-                          onPressed: () {
-                            debugPrint('Admin Login pressed - navigating');
-                            Get.to(() => AdminLoginScreen());
-                          },
-                          borderRadius: BorderRadius.circular(24),
-                          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
-                          child: const Text('Admin Login'),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                    ],
                   ),
                 ],
               ),

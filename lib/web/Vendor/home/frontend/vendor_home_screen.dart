@@ -1,6 +1,7 @@
 import 'package:eventoury/utils/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:eventoury/web/Vendor/vendor_layout.dart';
+import 'package:eventoury/Admin Mobile App/Admin Home Screens/Dashboard/admin_dashboard.dart';
 import 'package:get/get.dart';
 import 'package:eventoury/web/Vendor/vendor_shell_controller.dart';
 
@@ -166,7 +167,7 @@ class VendorHomeContent extends StatelessWidget {
                 } catch (_) {}
 
                 // fallback: ensure VendorShell exists then set the index
-                await Get.offAllNamed('/Vendor');
+                Get.offAll(() => const AdminDashboard());
                 try {
                   final ctrl2 = Get.find<VendorShellController>();
                   ctrl2.setIndex(6);
