@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants/colors.dart';
+import '../../utils/theme/elevated_button_theme.dart';
 
 class AdminCustomBottomNavigation extends StatelessWidget {
   const AdminCustomBottomNavigation({
@@ -26,33 +27,14 @@ class AdminCustomBottomNavigation extends StatelessWidget {
           ),
           Center(
             heightFactor: 0.45,
-            child: Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    EventouryColors.tangerine,
-                    EventouryColors.persimmon,
-                    EventouryColors.electric_orange,
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.18),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: RawMaterialButton(
-                shape: const CircleBorder(),
-                elevation: 2,
-                onPressed: () => onTap(2),
-                child: const Icon(Icons.search, color: Colors.white, size: 30),
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: EventouryElevatedButton(
+                onPressed: () => onTap(99), // special action for add
+                borderRadius: BorderRadius.circular(30),
+                padding: const EdgeInsets.all(0),
+                child: const Icon(Icons.add, color: Colors.white, size: 26),
               ),
             ),
           ),
@@ -63,10 +45,10 @@ class AdminCustomBottomNavigation extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildNavItem(Icons.dashboard_outlined, 0, context),
-                _buildNavItem(Icons.people_outline_rounded, 1, context),
-                SizedBox(width: 88), // Space for center button
-                _buildNavItem(Icons.analytics_outlined, 3, context),
-                _buildNavItem(Icons.settings_outlined, 4, context),
+                _buildNavItem(Icons.manage_accounts_outlined, 1, context),
+                SizedBox(width: 72), // Space for center button
+                _buildNavItem(Icons.analytics_outlined, 2, context),
+                _buildNavItem(Icons.person_outline, 3, context),
               ],
             ),
           ),
@@ -143,11 +125,11 @@ class AdminCustomBottomNavigation extends StatelessWidget {
       case 0:
         return 'Dashboard';
       case 1:
-        return 'Users';
+        return 'Manage';
+      case 2:
+        return 'Insights';
       case 3:
-        return 'Analytics';
-      case 4:
-        return 'Settings';
+        return 'Profile';
       default:
         return '';
     }
@@ -162,7 +144,7 @@ class AdminCustomPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Create the main path (rounded top with a center notch)
-    final double notchRadius = 38.0;
+  final double notchRadius = 34.0;
     final double centerStart = size.width * 0.40;
     final double centerEnd = size.width * 0.60;
 
@@ -180,9 +162,13 @@ class AdminCustomPainter extends CustomPainter {
     path.lineTo(0, size.height);
     path.close();
 
-    // fill with theme-aware background
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
-    Paint fillPaint = Paint()..color = bg..style = PaintingStyle.fill;
+  // fill with theme-aware background
+  final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+  // In light theme make the bar a touch different from the scaffold so it stands out slightly.
+  final bg = isDark
+    ? Theme.of(context).cardColor
+    : Color.lerp(scaffoldBg, Colors.grey.shade100, 0.06)!;
+  Paint fillPaint = Paint()..color = bg..style = PaintingStyle.fill;
 
     // draw subtle shadow for the curved bar
     canvas.drawShadow(path, Colors.black.withOpacity(isDark ? 0.6 : 0.12), 8.0, true);
@@ -191,4 +177,77 @@ class AdminCustomPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+/// A simplified bottom navigation shown on pushed admin pages.
+/// Shows only a Home icon and the center add button. Home pops back to the dashboard root.
+class AdminChildBottomNavigation extends StatelessWidget {
+  const AdminChildBottomNavigation({super.key, required this.selectedIndex, required this.onTap});
+
+  final int selectedIndex;
+  final Function(int) onTap; // 0..3 select tabs, 99 = add
+
+  @override
+  Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+    return Container(
+      width: size.width,
+      height: 80,
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          CustomPaint(size: Size(size.width, 80), painter: AdminCustomPainter(context)),
+          Center(
+            heightFactor: 0.45,
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: EventouryElevatedButton(
+                onPressed: () => onTap(99),
+                borderRadius: BorderRadius.circular(30),
+                padding: const EdgeInsets.all(0),
+                child: const Icon(Icons.add, color: Colors.white, size: 26),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: size.width,
+            height: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _childNavItem(context, Icons.dashboard_outlined, 0),
+                _childNavItem(context, Icons.manage_accounts_outlined, 1),
+                SizedBox(width: 72),
+                _childNavItem(context, Icons.analytics_outlined, 2),
+                _childNavItem(context, Icons.person_outline, 3),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _childNavItem(BuildContext context, IconData icon, int idx) {
+    final isSelected = selectedIndex == idx;
+    final color = Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black;
+    return GestureDetector(
+      onTap: () => onTap(idx),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ShaderMask(
+            shaderCallback: (Rect bounds) => LinearGradient(colors: [isSelected ? EventouryColors.tangerine : color, isSelected ? EventouryColors.persimmon : color]).createShader(bounds),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            idx == 0 ? 'Dashboard' : idx == 1 ? 'Manage' : idx == 2 ? 'Insights' : 'Profile',
+            style: TextStyle(color: color, fontSize: 12, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal),
+          ),
+        ],
+      ),
+    );
+  }
 }

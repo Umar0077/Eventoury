@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../Dashboard/admin_dashboard.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/theme/elevated_button_theme.dart';
+import '../../Admin_Bottom_Navigation_bar/Admin_bottom_navigation_bar.dart';
+import '../Admin_Add_new_Package/add_new_package_admin.dart';
 
 class PendingPayments extends StatefulWidget {
   const PendingPayments({super.key});
@@ -119,6 +121,16 @@ class _PendingPaymentsState extends State<PendingPayments> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: AdminChildBottomNavigation(
+        selectedIndex: 0,
+        onTap: (idx) {
+          if (idx == 99) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+            return;
+          }
+          Get.offAll(() => AdminDashboard(initialIndex: idx));
+        },
       ),
     );
   }

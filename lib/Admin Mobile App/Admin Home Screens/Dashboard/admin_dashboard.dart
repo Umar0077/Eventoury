@@ -5,18 +5,36 @@ import '../Total_Booking_screen/total_booking_screen.dart';
 import '../Revenue/Revenue_Admin.dart';
 import '../Active_Vendors/active_vendors_Admin.dart';
 import '../PendingPayments/pending_payments.dart';
+import '../Insights Admin/Admin_Insights.dart';
+import '../Admin_profile/Admin_profile.dart';
+import '../Manage_Admin/Admin_Manage_Screen.dart';
+import '../Admin_Add_new_Package/add_new_package_admin.dart';
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+  const AdminDashboard({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onNavTap(int idx) {
+    // special center add button uses 99
+    if (idx == 99) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+      return;
+    }
+    if (idx < 0 || idx > 3) return;
     setState(() {
       _selectedIndex = idx;
     });
@@ -25,11 +43,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _buildOverview(context),
-      const TotalBookingScreen(),
-      const RevenueAdmin(),
-      const ActiveVendorsAdmin(),
-      const PendingPayments(),
+      _buildOverview(context), // Dashboard
+      const AdminManageScreen(), // Manage
+      const AdminInsights(), // Insights
+      const AdminProfile(), // Profile
     ];
 
     return Scaffold(
@@ -101,28 +118,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
           icon: Icons.calendar_month,
           value: '1,254',
           label: 'Total Bookings',
-          onTap: () => _onNavTap(1),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TotalBookingScreen())),
         ),
         _buildSummaryCard(
           context,
           icon: Icons.account_balance_wallet,
           value: '\$2,340',
           label: 'Revenue This Month',
-          onTap: () => _onNavTap(2),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RevenueAdmin())),
         ),
         _buildSummaryCard(
           context,
           icon: Icons.people,
           value: '82',
           label: 'Active Vendors',
-          onTap: () => _onNavTap(3),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ActiveVendorsAdmin())),
         ),
         _buildSummaryCard(
           context,
           icon: Icons.pending_actions,
           value: '12',
           label: ' Pending Payments',
-          onTap: () => _onNavTap(4),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PendingPayments())),
         ),
       ],
     );
@@ -291,22 +308,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
-              child: Center(
-                child: Text(
-                  '300 × 200',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
+              child: Image.asset(
+                'assets/onboarding_images/onboarding_${(destinationNumber % 6) == 0 ? 6 : (destinationNumber % 6)}.jpeg',
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
           ),
