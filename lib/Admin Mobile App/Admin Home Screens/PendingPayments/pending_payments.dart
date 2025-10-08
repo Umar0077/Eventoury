@@ -90,6 +90,7 @@ class _PendingPaymentsState extends State<PendingPayments> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text(
           'Total Pending Payments',
@@ -126,7 +127,7 @@ class _PendingPaymentsState extends State<PendingPayments> {
         selectedIndex: 0,
         onTap: (idx) {
           if (idx == 99) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddNewPackageAdmin()));
             return;
           }
           Get.offAll(() => AdminDashboard(initialIndex: idx));
@@ -187,8 +188,10 @@ class _PendingPaymentsState extends State<PendingPayments> {
     required bool isMainValue,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
+    final bg = isDark ? Colors.black : Colors.white;
     final shadowColor = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -196,11 +199,8 @@ class _PendingPaymentsState extends State<PendingPayments> {
         color: bg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
+          BoxShadow(color: shadowColor, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: shadowColor.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
         ],
       ),
       child: Column(
@@ -219,7 +219,7 @@ class _PendingPaymentsState extends State<PendingPayments> {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
                 ),
               ),
             ],
@@ -238,8 +238,10 @@ class _PendingPaymentsState extends State<PendingPayments> {
 
   Widget _buildFilterSection(BuildContext context, bool isDark) {
     final fieldBg = isDark ? Colors.black : Colors.white;
-    final containerBg = isDark ? Colors.grey[900] : Colors.grey[50];
-    final fieldShadow = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final containerBg = isDark ? Colors.black : Colors.white;
+    final fieldShadow = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -249,6 +251,10 @@ class _PendingPaymentsState extends State<PendingPayments> {
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
         ),
+        boxShadow: [
+          BoxShadow(color: fieldShadow, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: fieldShadow.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +264,10 @@ class _PendingPaymentsState extends State<PendingPayments> {
             decoration: BoxDecoration(
               color: fieldBg,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [BoxShadow(color: fieldShadow, blurRadius: 12, offset: const Offset(0, 6))],
+              boxShadow: [
+                BoxShadow(color: fieldShadow, blurRadius: blur, offset: Offset(0, yOffset)),
+                BoxShadow(color: fieldShadow.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
+              ],
             ),
             child: TextField(
               controller: _searchController,
@@ -282,15 +291,15 @@ class _PendingPaymentsState extends State<PendingPayments> {
             children: [
               Flexible(
                 flex: 1,
-                child: _buildDropdown(
-                  context,
-                  'Status',
-                  _selectedStatus,
-                  _statusOptions,
-                  (value) => setState(() => _selectedStatus = value!),
-                  fieldBg,
-                  fieldShadow,
-                ),
+                        child: _buildDropdown(
+                          context,
+                          'Status',
+                          _selectedStatus,
+                          _statusOptions,
+                          (value) => setState(() => _selectedStatus = value!),
+                          fieldBg,
+                          fieldShadow,
+                        ),
               ),
               const SizedBox(width: 12),
               Flexible(
@@ -400,15 +409,20 @@ class _PendingPaymentsState extends State<PendingPayments> {
 
   Widget _buildPaymentCard(BuildContext context, Map<String, dynamic> payment) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
+    final bg = isDark ? Colors.black : Colors.white;
     final shadowColor = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: shadowColor, blurRadius: 14, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(color: shadowColor, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: shadowColor.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -423,6 +437,7 @@ class _PendingPaymentsState extends State<PendingPayments> {
                   payment['transactionId'],
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
                 _buildStatusBadge(payment['status']),
@@ -464,18 +479,23 @@ class _PendingPaymentsState extends State<PendingPayments> {
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    final labelColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    final valueColor = isDark ? Colors.grey[300] : Colors.black87;
+
     return Row(
       children: [
         Icon(
           icon,
           size: 16,
-          color: Colors.grey[600],
+          color: iconColor,
         ),
         const SizedBox(width: 8),
         Text(
           '$label: ',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
+            color: labelColor,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -484,6 +504,7 @@ class _PendingPaymentsState extends State<PendingPayments> {
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
+              color: valueColor,
             ),
           ),
         ),
@@ -494,7 +515,8 @@ class _PendingPaymentsState extends State<PendingPayments> {
   Widget _buildStatusBadge(String status) {
     Color backgroundColor;
     Color textColor = Colors.white;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     switch (status.toLowerCase()) {
       case 'awaiting confirmation':
         backgroundColor = EventouryColors.tangerine;
@@ -514,6 +536,9 @@ class _PendingPaymentsState extends State<PendingPayments> {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: isDark
+            ? [BoxShadow(color: Colors.white.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))]
+            : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       child: Text(
         status,

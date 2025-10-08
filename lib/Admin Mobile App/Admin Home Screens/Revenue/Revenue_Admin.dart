@@ -63,6 +63,7 @@ class _RevenueAdminState extends State<RevenueAdmin> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text(
           'Revenue This Month',
@@ -97,7 +98,7 @@ class _RevenueAdminState extends State<RevenueAdmin> {
         selectedIndex: 0,
         onTap: (idx) {
           if (idx == 99) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddNewPackageAdmin()));
             return;
           }
           Get.offAll(() => AdminDashboard(initialIndex: idx));
@@ -158,8 +159,10 @@ class _RevenueAdminState extends State<RevenueAdmin> {
     required bool isMainValue,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
-    final shadowColor = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final bg = isDark ? Colors.black : Colors.white;
+    final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -167,11 +170,8 @@ class _RevenueAdminState extends State<RevenueAdmin> {
         color: bg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
+          BoxShadow(color: shadowColor, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: shadowColor.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
         ],
       ),
       child: Column(
@@ -224,18 +224,11 @@ class _RevenueAdminState extends State<RevenueAdmin> {
             height: 250,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Theme.of(context).cardColor
-                  : Colors.white,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.04)
-                      : Colors.black.withOpacity(0.08),
-                  blurRadius: 14,
-                  offset: const Offset(0, 6),
-                ),
+                BoxShadow(color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08), blurRadius: Theme.of(context).brightness == Brightness.dark ? 18.0 : 14.0, offset: Offset(0, Theme.of(context).brightness == Brightness.dark ? 8.0 : 6.0)),
+                BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08)).withOpacity(0.02), blurRadius: (Theme.of(context).brightness == Brightness.dark ? 18.0 : 14.0) / 2, offset: Offset(0, (Theme.of(context).brightness == Brightness.dark ? 8.0 : 6.0) / 2)),
               ],
             ),
             child: Column(
@@ -305,8 +298,10 @@ class _RevenueAdminState extends State<RevenueAdmin> {
   Widget _buildTransactionCard(
       BuildContext context, Map<String, dynamic> transaction) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
-    final shadowColor = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final bg = isDark ? Colors.black : Colors.white;
+    final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -314,11 +309,8 @@ class _RevenueAdminState extends State<RevenueAdmin> {
         color: bg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: shadowColor, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: shadowColor.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
         ],
       ),
       child: Padding(

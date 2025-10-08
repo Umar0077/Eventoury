@@ -70,6 +70,7 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text(
           'Total Bookings',
@@ -99,7 +100,7 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
         selectedIndex: 0,
         onTap: (idx) {
           if (idx == 99) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddNewPackageAdmin()));
             return;
           }
           Get.offAll(() => AdminDashboard(initialIndex: idx));
@@ -110,8 +111,11 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
 
   Widget _buildFilterSection(BuildContext context, bool isDark) {
     final fieldBg = isDark ? Colors.black : Colors.white;
-    final containerBg = isDark ? Colors.grey[900] : Colors.grey[50];
-    final fieldShadow = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final containerBg = isDark ? Colors.black : Colors.white;
+    // theme-aware shadow: white glow on dark, soft black shadow on light
+    final fieldShadow = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -121,6 +125,10 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
         ),
+        boxShadow: [
+          BoxShadow(color: fieldShadow, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: fieldShadow.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,8 +141,8 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
               boxShadow: [
                 BoxShadow(
                   color: fieldShadow,
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+                  blurRadius: blur,
+                  offset: Offset(0, yOffset),
                 ),
               ],
             ),
@@ -167,7 +175,7 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
                   _statusOptions,
                   (value) => setState(() => _selectedStatus = value!),
                   fieldBg,
-                  fieldShadow,
+                    fieldShadow,
                 ),
               ),
               const SizedBox(width: 12),
@@ -245,8 +253,8 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
             boxShadow: [
               BoxShadow(
                 color: fieldShadow,
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                blurRadius: Theme.of(context).brightness == Brightness.dark ? 18.0 : 14.0,
+                offset: Offset(0, Theme.of(context).brightness == Brightness.dark ? 8.0 : 6.0),
               ),
             ],
           ),
@@ -290,8 +298,10 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
 
   Widget _buildBookingCard(BuildContext context, Map<String, dynamic> booking) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
-    final shadowColor = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.08);
+    final bg = isDark ? Colors.black : Colors.white;
+    final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -299,11 +309,8 @@ class _TotalBookingScreenState extends State<TotalBookingScreen> {
         color: bg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: shadowColor, blurRadius: blur, offset: Offset(0, yOffset)),
+          BoxShadow(color: shadowColor.withOpacity(0.02), blurRadius: blur / 2, offset: Offset(0, yOffset / 2)),
         ],
       ),
       child: Padding(

@@ -14,10 +14,11 @@ class BookingVendor extends StatelessWidget {
 	  {'name': 'Michael Johnson', 'package': 'Mountain Hiking - 1 Day', 'status': 'Cancelled', 'datetime': '20 Sept, 9:00 AM'},
 	];
 
-	return VendorLayout(
+		return VendorLayout(
 	  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 28.0),
 	  floatingActionButton: FloatingActionButton(
-		onPressed: () {},
+					heroTag: 'bookingvendor_fab',
+					onPressed: () {},
 		backgroundColor: EventouryColors.tangerine,
 		child: const Icon(Icons.add),
 	  ),

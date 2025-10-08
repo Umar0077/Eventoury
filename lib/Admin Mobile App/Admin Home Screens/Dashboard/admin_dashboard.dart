@@ -31,7 +31,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   void _onNavTap(int idx) {
     // special center add button uses 99
     if (idx == 99) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddNewPackageAdmin()));
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddNewPackageAdmin()));
       return;
     }
     if (idx < 0 || idx > 3) return;
@@ -50,6 +50,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     ];
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         child: IndexedStack(
           index: _selectedIndex,
@@ -152,8 +153,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
     VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
+    // Explicit backgrounds for consistent look across themes
+    final bg = isDark ? Colors.black : Colors.white;
+    // In dark mode use a subtle white shadow; in light mode use a subtle black shadow
     final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return GestureDetector(
       onTap: onTap ?? () {},
@@ -165,8 +170,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
           boxShadow: [
             BoxShadow(
               color: shadowColor,
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              blurRadius: blur,
+              offset: Offset(0, yOffset),
+            ),
+            // very subtle secondary shadow for depth
+            BoxShadow(
+              color: shadowColor.withOpacity(0.02),
+              blurRadius: blur / 2,
+              offset: Offset(0, yOffset / 2),
             ),
           ],
         ),
@@ -201,6 +212,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Widget _buildBookingTrends(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Use explicit background color and theme-aware shadow for the chart card
+    final bg = isDark ? Colors.black : Colors.white;
+    final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -215,13 +232,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
           height: 300,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? Theme.of(context).cardColor : Colors.white,
+            color: bg,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+                color: shadowColor,
+                blurRadius: blur,
+                offset: Offset(0, yOffset),
+              ),
+              BoxShadow(
+                color: shadowColor.withOpacity(0.02),
+                blurRadius: blur / 2,
+                offset: Offset(0, yOffset / 2),
               ),
             ],
           ),
@@ -249,7 +271,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Text(
                 '2025',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.purple,
+                  color: EventouryColors.tangerine,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -287,8 +309,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Widget _buildDestinationCard(BuildContext context, int destinationNumber) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? Theme.of(context).cardColor : Colors.white;
+    final bg = isDark ? Colors.black : Colors.white;
     final shadowColor = isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.08);
+    final double blur = isDark ? 18.0 : 14.0;
+    final double yOffset = isDark ? 8.0 : 6.0;
 
     return Container(
       width: 160,
@@ -299,8 +323,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         boxShadow: [
           BoxShadow(
             color: shadowColor,
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            blurRadius: blur,
+            offset: Offset(0, yOffset),
           ),
         ],
       ),
@@ -353,15 +377,15 @@ class BookingTrendsChart extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.purple
+      ..color = EventouryColors.tangerine
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
         colors: [
-          Colors.purple.withOpacity(0.3),
-          Colors.purple.withOpacity(0.1),
+          EventouryColors.tangerine.withOpacity(0.28),
+          EventouryColors.tangerine.withOpacity(0.08),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -391,7 +415,7 @@ class BookingTrendsChart extends CustomPainter {
         Offset(x, y),
         4,
         Paint()
-          ..color = Colors.purple
+          ..color = EventouryColors.tangerine
           ..style = PaintingStyle.fill,
       );
       canvas.drawCircle(
