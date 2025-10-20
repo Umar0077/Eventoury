@@ -1,4 +1,7 @@
-import 'package:eventoury/mobile/vendor/bookings/frontend/bookings.dart';
+import 'package:eventoury/mobile/vendor/home/bookings/frontend/bookings.dart';
+import 'package:eventoury/mobile/vendor/home/Revenue/frontend/Revenue_vendor_mobile.dart';
+import 'package:eventoury/mobile/vendor/home/Reviews/frontend/Reviews_vendor_mobile.dart';
+import 'package:eventoury/mobile/vendor/home/Active Packages/frontend/Active_packages_vendor.dart';
 import 'package:eventoury/mobile/vendor/home/frontend/widgets/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,16 +37,24 @@ class _VendorHomeContent extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _InfoCard(title: 'Bookings', value: '120', icon: Icons.book_online_rounded),
-                  _InfoCard(title: 'Revenue', value: '2902', icon: Icons.bar_chart_rounded),
+                  _InfoCard(title: 'Bookings', value: '120', icon: Icons.book_online_rounded, onTap: () {
+                    vendorNestedKey.currentState?.push(MaterialPageRoute(builder: (_) => const VendorBookingScreen()));
+                  }),
+                  _InfoCard(title: 'Revenue', value: '2902', icon: Icons.bar_chart_rounded, onTap: () {
+                    vendorNestedKey.currentState?.push(MaterialPageRoute(builder: (_) => RevenueVendorMobile()));
+                  }),
                 ],
               ),
               SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _InfoCard(title: '230 reviews', value: '4.7', icon: Icons.star_rounded, isStar: true),
-                  _InfoCard(title: 'Active Packages', value: '15', icon: Icons.card_travel_rounded),
+                  _InfoCard(title: '230 reviews', value: '4.7', icon: Icons.star_rounded, isStar: true, onTap: () {
+                    vendorNestedKey.currentState?.push(MaterialPageRoute(builder: (_) => ReviewsVendorMobile()));
+                  }),
+                  _InfoCard(title: 'Active Packages', value: '15', icon: Icons.card_travel_rounded, onTap: () {
+                    vendorNestedKey.currentState?.push(MaterialPageRoute(builder: (_) => ActivePackagesVendor()));
+                  }),
                 ],
               ),
               SizedBox(height: 24),
@@ -144,40 +155,46 @@ class _InfoCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final bool isStar;
+  final VoidCallback? onTap;
 
   const _InfoCard({
     required this.title,
     required this.value,
     required this.icon,
     this.isStar = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        shadowColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    icon,
-                    color: EventouryColors.tangerine,
-                    size: 24,
-                  ),
-                  SizedBox(width: 8),
-                  Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                ],
-              ),
-              SizedBox(height: 6),
-              Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
-            ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Card(
+          margin: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          shadowColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      icon,
+                      color: EventouryColors.tangerine,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+              ],
+            ),
           ),
         ),
       ),
