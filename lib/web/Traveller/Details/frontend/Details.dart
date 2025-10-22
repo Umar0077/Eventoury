@@ -24,6 +24,7 @@ class DetailsScreen extends StatefulWidget {
   });
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
+
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
@@ -187,6 +188,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     Expanded(
                       child: ClipRRect(
                         borderRadius: const BorderRadius.only(
+// ...existing code...
                           topLeft: Radius.circular(32),
                           topRight: Radius.circular(32),
                         ),
@@ -271,7 +273,42 @@ class _DetailsScreenState extends State<DetailsScreen> {
         // Right side - Map
         Expanded(
           flex: 1,
-          child: _buildMapSection(theme, true),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildMapSection(theme, true),
+              const SizedBox(height: 12),
+              // Align chips to the right under the map
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildInfoChip(
+                      icon: Icons.thermostat,
+                      text: controller.temperature.value,
+                      theme: theme,
+                      isDesktop: true,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildInfoChip(
+                      icon: Icons.location_on,
+                      text: controller.location.value,
+                      theme: theme,
+                      isDesktop: true,
+                    ),
+                    const SizedBox(width: 12),
+                    Obx(() => _buildRatingChip(
+                          rating: controller.rating.value,
+                          reviewCount: controller.reviewCount.value,
+                          theme: theme,
+                          isDesktop: true,
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -283,6 +320,35 @@ class _DetailsScreenState extends State<DetailsScreen> {
         _buildDestinationInfo(controller, theme, false, isTablet),
         const SizedBox(height: 20),
         _buildMapSection(theme, false),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildInfoChip(
+                icon: Icons.thermostat,
+                text: controller.temperature.value,
+                theme: theme,
+                isDesktop: isMobile,
+              ),
+              const SizedBox(width: 12),
+              _buildInfoChip(
+                icon: Icons.location_on,
+                text: controller.location.value,
+                theme: theme,
+                isDesktop: isMobile,
+              ),
+              const SizedBox(width: 12),
+              _buildRatingChip(
+                rating: controller.rating.value,
+                reviewCount: controller.reviewCount.value,
+                theme: theme,
+                isDesktop: isMobile,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -291,7 +357,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
         Obx(() => Text(
           controller.destinationTitle.value,
           style: TextStyle(
@@ -300,56 +365,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
             color: theme.textTheme.headlineLarge?.color,
           ),
         )),
+
         const SizedBox(height: 8),
-        
-        // Location
+
         Obx(() => Text(
           controller.location.value,
           style: TextStyle(
-            fontSize: isDesktop ? 16 : isTablet ? 15 : 14,
+            fontSize: isDesktop ? 16 : 14,
             color: theme.textTheme.bodyMedium?.color,
           ),
         )),
-        const SizedBox(height: 16),
-        
-        // Temperature, Country, Rating, Price Row
-        Wrap(
-          spacing: 20,
-          runSpacing: 10,
-          children: [
-            // Temperature
-            _buildInfoChip(
-              icon: Icons.thermostat,
-              text: controller.temperature.value,
-              theme: theme,
-              isDesktop: isDesktop,
-            ),
-            
-            // Country
-            Obx(() => _buildInfoChip(
-              icon: Icons.location_on,
-              text: controller.country.value,
-              theme: theme,
-              isDesktop: isDesktop,
-            )),
-            
-            // Rating
-            Obx(() => _buildRatingChip(
-              rating: controller.rating.value,
-              reviewCount: controller.reviewCount.value,
-              theme: theme,
-              isDesktop: isDesktop,
-            )),
-            
-            // Price
-            Obx(() => _buildPriceChip(
+
+        const SizedBox(height: 12),
+        // Show price under the location on the left side
+        Obx(() => _buildPriceChip(
               price: controller.price.value,
               unit: controller.priceUnit.value,
               theme: theme,
               isDesktop: isDesktop,
             )),
-          ],
-        ),
       ],
     );
   }
@@ -543,11 +577,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Widget _buildGallerySection(DetailsController controller, ThemeData theme, bool isDesktop, bool isTablet) {
+    // Deduplicate images to avoid accidental duplicate display
+    final images = controller.galleryImages.toSet().toList();
     return SizedBox(
       height: isDesktop ? 120 : isTablet ? 100 : 80,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: controller.galleryImages.length,
+        itemCount: images.length,
         itemBuilder: (context, index) {
           return Container(
             width: isDesktop ? 120 : isTablet ? 100 : 80,
@@ -555,7 +591,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               image: DecorationImage(
-                image: AssetImage(controller.galleryImages[index]),
+                image: AssetImage(images[index]),
                 fit: BoxFit.cover,
               ),
             ),
@@ -579,34 +615,31 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
         const SizedBox(height: 16),
         Obx(() => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              controller.aboutDescription.value,
-              style: TextStyle(
-                fontSize: isDesktop ? 16 : isTablet ? 15 : 14,
-                height: 1.6,
-                color: theme.textTheme.bodyMedium?.color,
-              ),
-              maxLines: controller.isExpanded.value ? null : 3,
-              overflow: controller.isExpanded.value ? null : TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: controller.toggleReadMore,
-              child: Text(
-                controller.readMoreText.value,
-                style: TextStyle(
-                  fontSize: isDesktop ? 16 : isTablet ? 15 : 14,
-                  color: EventouryColors.tangerine,
-                  fontWeight: FontWeight.w600,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  controller.aboutDescription.value,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 16 : 14,
+                    color: theme.textTheme.bodyMedium?.color,
+                  ),
                 ),
-              ),
-            ),
-          ],
-        )),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: controller.toggleReadMore,
+                  child: Obx(() => Text(
+                        controller.readMoreText.value,
+                        style: TextStyle(
+                          color: EventouryColors.persimmon,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )),
+                ),
+              ],
+            )),
       ],
     );
+  }
   }
 
   Widget _buildBookButton(DetailsController controller, bool isDesktop, bool isTablet) {
@@ -629,4 +662,4 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   // Footer replaced by shared BottomBarWidget
-}
+

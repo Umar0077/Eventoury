@@ -121,27 +121,11 @@ class _LoginScreenVendorState extends State<LoginScreenVendor> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            // prompt under social buttons
+                            // keep only the traveller link (no signup prompt)
                             Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Text("Don't have an account? "),
-                                      TextButton(
-                                        onPressed: () => Get.to(() => const SignUpScreenVendor()),
-                                        child: Text('Sign Up', style: TextStyle(color: EventouryColors.tangerine)),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  TextButton(
-                                    onPressed: () => Get.to(() => const LoginWeb()),
-                                    child: Text('Join as a Traveller', style: TextStyle(color: EventouryColors.tangerine, decoration: TextDecoration.underline)),
-                                  ),
-                                ],
+                              child: TextButton(
+                                onPressed: () => Get.to(() => const LoginWeb()),
+                                child: Text('Join as a Traveller', style: TextStyle(color: EventouryColors.tangerine, decoration: TextDecoration.underline)),
                               ),
                             ),
                           ],

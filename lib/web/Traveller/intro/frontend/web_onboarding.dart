@@ -103,7 +103,7 @@ class WebOnboardingScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 32),
                       
-                      // Navigation buttons
+                      // Navigation buttons - make both buttons equal height
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -113,25 +113,28 @@ class WebOnboardingScreen extends StatelessWidget {
                               border: Border.all(color: Colors.white.withOpacity(0.5)),
                               borderRadius: BorderRadius.circular(25),
                             ),
-                            child: TextButton(
-                              onPressed: controller.skip,
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
+                            child: SizedBox(
+                              height: 56,
+                              child: TextButton(
+                                onPressed: controller.skip,
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 0,
+                                  ),
                                 ),
-                              ),
-                              child: const Text(
-                                'Skip',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                child: const Text(
+                                  'Skip',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          
+
                           // Next/Get Started button
                           Container(
                             decoration: BoxDecoration(
@@ -140,24 +143,27 @@ class WebOnboardingScreen extends StatelessWidget {
                               ),
                               borderRadius: BorderRadius.circular(25),
                             ),
-                            child: EventouryElevatedButton(
-                              onPressed: controller.nextOrFinish,
-                              borderRadius: BorderRadius.circular(25),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
-                                ),
-                                child: Obx(
-                                  () => Text(
-                                    controller.currentPage.value ==
-                                            controller.pages.length - 1
-                                        ? 'Get Started'
-                                        : 'Next',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                            child: SizedBox(
+                              height: 56,
+                              child: EventouryElevatedButton(
+                                onPressed: controller.nextOrFinish,
+                                borderRadius: BorderRadius.circular(25),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 0,
+                                  ),
+                                  child: Obx(
+                                    () => Text(
+                                      controller.currentPage.value ==
+                                              controller.pages.length - 1
+                                          ? 'Get Started'
+                                          : 'Next',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),

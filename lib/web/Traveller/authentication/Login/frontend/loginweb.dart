@@ -119,21 +119,11 @@ class _LoginWebState extends State<LoginWeb> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            // prompt under social buttons
+                            // prompt under social buttons (vendor link only)
                             Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Text("Don't have an account? "),
-                                      TextButton(
-                                        onPressed: () => Get.to(() => const SignupWeb()),
-                                        child: Text('Sign Up', style: TextStyle(color: EventouryColors.tangerine)),
-                                      ),
-                                    ],
-                                  ),
                                   const SizedBox(height: 6),
                                   TextButton(
                                     onPressed: () => Get.to(() => const LoginScreenVendor()),

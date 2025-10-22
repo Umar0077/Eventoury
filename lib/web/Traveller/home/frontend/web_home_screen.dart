@@ -525,56 +525,57 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       onTap: () {
         // Handle navigation or other actions here
       },
-      child: Card(
+      child: Container(
         margin: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 8),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 2,
-        shadowColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
-        shape: RoundedRectangleBorder(
+        height: isMobile ? 180 : double.infinity,
+        padding: EdgeInsets.all(cardPadding),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.15),
+              blurRadius: 16,
+              spreadRadius: 2,
+              offset: Offset(0, 6),
+            ),
+          ],
         ),
-        child: Container(
-          height: isMobile ? 180 : double.infinity,
-          padding: EdgeInsets.all(cardPadding),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              // Image container - takes most of the space
-              Expanded(
-                flex: 3,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    image: DecorationImage(
-                      image: AssetImage(categoryImages[category] ?? 'assets/onboarding_images/onboarding_1.jpeg'),
-                      fit: BoxFit.cover,
-                    ),
+        child: Column(
+          children: [
+            // Image container - takes most of the space
+            Expanded(
+              flex: 3,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  image: DecorationImage(
+                    image: AssetImage(categoryImages[category] ?? 'assets/onboarding_images/onboarding_1.jpeg'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
-              SizedBox(height: isMobile ? 8 : 12),
-              // Text section - fixed height for text
-              SizedBox(
-                height: isMobile ? 40 : 44,
-                child: Center(
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontSize: isMobile ? 12 : 14,
-                      fontWeight: FontWeight.w600,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: isMobile ? 8 : 12),
+            // Text section - fixed height for text
+            SizedBox(
+              height: isMobile ? 40 : 44,
+              child: Center(
+                child: Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: isMobile ? 12 : 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
