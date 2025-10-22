@@ -1,2 +1,0 @@
-C:/Flutter projects/Eventoury/eventoury/build/.cxx/debug/312l3616/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Flutter projects/Eventoury/eventoury/build/.cxx/debug/312l3616/arm64-v8a/CMakeFiles/rebuild_cache.dir
