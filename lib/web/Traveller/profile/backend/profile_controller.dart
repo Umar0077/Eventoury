@@ -6,6 +6,8 @@ class ProfileController extends GetxController {
   final emailController = TextEditingController(text: 'huzaifa.ux@gmail.com');
   final phoneController = TextEditingController(text: '+92 1234567890');
   final locationController = TextEditingController(text: 'Lahore, Pakistan');
+  final occupationController = TextEditingController(text: 'Service Provider');
+  final ageController = TextEditingController(text: '30');
 
   final isSaving = false.obs;
   final isEditing = false.obs;
@@ -15,6 +17,8 @@ class ProfileController extends GetxController {
   late String _originalEmail;
   late String _originalPhone;
   late String _originalLocation;
+  late String _originalOccupation;
+  late String _originalAge;
 
   void startEdit() {
     // store originals
@@ -22,6 +26,8 @@ class ProfileController extends GetxController {
     _originalEmail = emailController.text;
     _originalPhone = phoneController.text;
     _originalLocation = locationController.text;
+    _originalOccupation = occupationController.text;
+    _originalAge = ageController.text;
     isEditing.value = true;
   }
 
@@ -31,6 +37,8 @@ class ProfileController extends GetxController {
     emailController.text = _originalEmail;
     phoneController.text = _originalPhone;
     locationController.text = _originalLocation;
+    occupationController.text = _originalOccupation;
+    ageController.text = _originalAge;
     isEditing.value = false;
   }
 
@@ -45,6 +53,8 @@ class ProfileController extends GetxController {
     _originalEmail = emailController.text;
     _originalPhone = phoneController.text;
     _originalLocation = locationController.text;
+  _originalOccupation = occupationController.text;
+  _originalAge = ageController.text;
     isEditing.value = false;
     // Optionally show a snackbar
     Get.snackbar('Saved', 'Profile information saved successfully', snackPosition: SnackPosition.BOTTOM);
@@ -56,6 +66,8 @@ class ProfileController extends GetxController {
     emailController.dispose();
     phoneController.dispose();
     locationController.dispose();
+    occupationController.dispose();
+    ageController.dispose();
     super.onClose();
   }
 }

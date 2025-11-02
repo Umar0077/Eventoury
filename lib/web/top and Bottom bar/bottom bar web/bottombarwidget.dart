@@ -43,6 +43,8 @@ class BottomBarWidget extends StatelessWidget {
           children: [
             _iconCircle(FontAwesomeIcons.linkedin, onTap: () {}),
             const SizedBox(width: 8),
+            _iconCircle(FontAwesomeIcons.facebook, onTap: () {}),
+            const SizedBox(width: 8),
             _iconCircle(FontAwesomeIcons.instagram, onTap: () {}),
             const SizedBox(width: 8),
             _iconCircle(FontAwesomeIcons.tiktok, onTap: () {}),
@@ -88,6 +90,8 @@ class BottomBarWidget extends StatelessWidget {
                 // Icons centered with responsive spacing
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   _iconCircle(FontAwesomeIcons.linkedin, onTap: () {}),
+                  SizedBox(width: screenWidth > 600 ? 12 : 8),
+                  _iconCircle(FontAwesomeIcons.facebook, onTap: () {}),
                   SizedBox(width: screenWidth > 600 ? 12 : 8),
                   _iconCircle(FontAwesomeIcons.instagram, onTap: () {}),
                   SizedBox(width: screenWidth > 600 ? 12 : 8),

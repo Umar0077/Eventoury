@@ -53,6 +53,42 @@ class WebHomeController extends GetxController {
       'image': 'assets/onboarding_images/onboarding_3.jpeg',
       'isFavorite': false,
     },
+    {
+      'title': 'Island Retreat, Maldives',
+      'location': 'Maldives',
+      'rating': 4.8,
+      'beach': 'Island View',
+      'wifi': true,
+      'image': 'assets/onboarding_images/onboarding_4.jpeg',
+      'isFavorite': false,
+    },
+    {
+      'title': 'Cultural Tour, Indonesia',
+      'location': 'Indonesia',
+      'rating': 4.6,
+      'beach': 'Cultural Sites',
+      'wifi': false,
+      'image': 'assets/onboarding_images/onboarding_1.jpeg',
+      'isFavorite': false,
+    },
+    {
+      'title': 'Safari Escape, Kenya',
+      'location': 'Kenya',
+      'rating': 4.7,
+      'beach': 'Wildlife',
+      'wifi': false,
+      'image': 'assets/onboarding_images/onboarding_2.jpeg',
+      'isFavorite': false,
+    },
+    {
+      'title': 'City Lights, USA',
+      'location': 'USA',
+      'rating': 4.4,
+      'beach': 'City View',
+      'wifi': true,
+      'image': 'assets/onboarding_images/onboarding_3.jpeg',
+      'isFavorite': false,
+    },
   ].obs;
 
   void toggleFavorite(int index) {

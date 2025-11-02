@@ -98,9 +98,17 @@ class ProfileWeb extends StatelessWidget {
 																	const SizedBox(height: 8),
 																	Obx(() => _inputField(controller.phoneController, theme: theme, hint: '+92 1234567890', readOnly: !controller.isEditing.value)),
 																	const SizedBox(height: 16),
-																	_label('Location', theme),
-																	const SizedBox(height: 8),
-																	Obx(() => _inputField(controller.locationController, theme: theme, hint: 'Lahore, Pakistan', readOnly: !controller.isEditing.value)),
+																_label('Location', theme),
+																const SizedBox(height: 8),
+																Obx(() => _inputField(controller.locationController, theme: theme, hint: 'Lahore, Pakistan', readOnly: !controller.isEditing.value)),
+																const SizedBox(height: 16),
+																_label('Occupation', theme),
+																const SizedBox(height: 8),
+																Obx(() => _inputField(controller.occupationController, theme: theme, hint: 'Your occupation (e.g., Guide)', readOnly: !controller.isEditing.value)),
+																const SizedBox(height: 16),
+																_label('Age', theme),
+																const SizedBox(height: 8),
+																Obx(() => _inputField(controller.ageController, theme: theme, hint: '30', readOnly: !controller.isEditing.value, keyboardType: TextInputType.number)),
 																],
 															),
 														),
@@ -142,10 +150,11 @@ class ProfileWeb extends StatelessWidget {
 
 	Widget _label(String text, ThemeData theme) => Text(text, style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.w600));
 
-	Widget _inputField(TextEditingController controller, {required ThemeData theme, String? hint, bool readOnly = false}) {
+	Widget _inputField(TextEditingController controller, {required ThemeData theme, String? hint, bool readOnly = false, TextInputType? keyboardType}) {
 		return TextField(
 			controller: controller,
 			readOnly: readOnly,
+			keyboardType: keyboardType,
 			decoration: InputDecoration(
 				hintText: hint,
 				filled: true,

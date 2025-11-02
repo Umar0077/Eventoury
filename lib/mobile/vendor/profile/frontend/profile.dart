@@ -2,6 +2,8 @@ import 'package:eventoury/utils/constants/colors.dart';
 import 'package:eventoury/utils/theme/elevated_button_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:eventoury/utils/theme/theme_controller.dart';
 
 class VendorProfileScreen extends StatelessWidget {
   const VendorProfileScreen({super.key});
@@ -61,7 +63,7 @@ class VendorProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _settingsTile(Icons.language, 'Change language', () {}, context),
-              _settingsTile(Icons.brightness_6, 'Appearance', () {}, context),
+              _settingsTile(Icons.brightness_6, 'Appearance', () { _showAppearanceSheet(context); }, context),
               _settingsTile(Icons.notifications, 'Notification', () {}, context),
               _settingsTile(FontAwesomeIcons.headset, 'Support', () {}, context),
               const Divider(height: 50),
@@ -108,6 +110,29 @@ class VendorProfileScreen extends StatelessWidget {
         trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,),
         onTap: onTap,
       ),
+    );
+  }
+
+  void _showAppearanceSheet(BuildContext context) {
+    final themeCtrl = Get.find<ThemeController>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      builder: (_) {
+        return Obx(() => Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text('Dark Mode', style: Theme.of(context).textTheme.bodyLarge),
+                trailing: Switch(activeColor: EventouryColors.tangerine, value: themeCtrl.isDark.value, onChanged: (v) => themeCtrl.setDark(v)),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ));
+      }
     );
   }
 }

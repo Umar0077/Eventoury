@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'firebase_options.dart';
+import 'utils/theme/theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Register theme controller early so UI can read persisted choice
+  Get.put(ThemeController());
   // Ensure the WebHomeController is registered as early as possible so
   // pages that call Get.find<WebHomeController>() won't fail during build.
   Get.put(WebHomeController());
@@ -35,11 +38,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeCtrl = Get.find<ThemeController>();
 
-    return GetMaterialApp(
+    return Obx(() => GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Eventoury',
-      themeMode: ThemeMode.system,
+      // default to dark unless user switches
+      themeMode: themeCtrl.isDark.value ? ThemeMode.dark : ThemeMode.light,
       theme: EventouryAppTheme.lightTheme,
       darkTheme: EventouryAppTheme.darkTheme,
       // app-level bindings handled during startup (registered before runApp)
@@ -61,6 +66,6 @@ class MyApp extends StatelessWidget {
             GetPage(name: '/VendorPackages', page: () => const VendorShell(initialIndex: 6)),
           ],
   initialRoute: '/splash',
-    );
+    ));
   }
 }

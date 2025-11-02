@@ -1,13 +1,71 @@
 import 'package:eventoury/utils/constants/colors.dart';
 import 'package:eventoury/web/Traveller/explore%20categories/frontend/explore_categories.dart';
+import 'package:eventoury/web/Traveller/HotDeals/frontendHotDeals.dart';
+import 'package:eventoury/web/Traveller/Details/frontend/Details.dart';
+import 'package:eventoury/web/Traveller/sub categories/frontend/subcategories.dart';
 import 'package:eventoury/web/Traveller/home/backend/web_home_controller.dart';
 import 'package:eventoury/web/Traveller/settings/frontend/settingsweb.dart';
 import 'package:eventoury/web/top and Bottom bar/top bar web/topbarwidget.dart';
 import 'package:eventoury/web/top and Bottom bar/bottom bar web/bottombarwidget.dart';
+import 'package:eventoury/web/Traveller/AboutusSection/frontendAbout.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:eventoury/utils/theme/elevated_button_theme.dart';
+
+// Small helper that scales its child slightly on mouse hover (web)
+class _HoverScale extends StatefulWidget {
+  final Widget child;
+  const _HoverScale({Key? key, required this.child}) : super(key: key);
+
+  @override
+  State<_HoverScale> createState() => _HoverScaleState();
+}
+
+class _HoverScaleState extends State<_HoverScale> {
+  bool _hover = false;
+  static const double _scale = 1.04;
+  static const Duration _duration = Duration(milliseconds: 150);
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: _duration,
+        curve: Curves.easeOut,
+        transform: Matrix4.identity()..scale(_hover ? _scale : 1.0),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// Shared card decoration used across home screen cards to provide a consistent
+// shadow and rounded corner appearance similar to the Subcategories card style.
+BoxDecoration _sharedCardDecoration(ThemeData theme, {double radius = 16.0}) {
+  final isDark = theme.brightness == Brightness.dark;
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(radius),
+    boxShadow: [
+      BoxShadow(
+        color: isDark ? Colors.black.withOpacity(0.65) : Colors.black.withOpacity(0.12),
+        blurRadius: 28,
+        offset: const Offset(0, 12),
+      ),
+      BoxShadow(
+        color: isDark ? Colors.black.withOpacity(0.35) : Colors.black.withOpacity(0.06),
+        blurRadius: 12,
+        offset: const Offset(0, 6),
+      ),
+      BoxShadow(
+        color: isDark ? Colors.black.withOpacity(0.18) : Colors.black.withOpacity(0.03),
+        blurRadius: 4,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  );
+}
 
 class WebHomeScreen extends StatefulWidget {
   const WebHomeScreen({super.key});
@@ -16,9 +74,13 @@ class WebHomeScreen extends StatefulWidget {
   State<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
-class _WebHomeScreenState extends State<WebHomeScreen> {
+class _WebHomeScreenState extends State<WebHomeScreen> with TickerProviderStateMixin {
   late final WebHomeController controller;
   late final ScrollController scrollController;
+  late final ScrollController _exploreScrollController;
+  AnimationController? _animController;
+  AnimationController? _hotDealsAnimController;
+  AnimationController? _aboutAnimController;
 
   // Per-instance GlobalKeys to avoid reusing the same GlobalKey across
   // multiple widget instances (which causes the 'Multiple widgets used the same GlobalKey' error).
@@ -32,6 +94,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     super.initState();
     controller = Get.put(WebHomeController());
     scrollController = ScrollController();
+  _exploreScrollController = ScrollController();
+
+  // Initialize animation controllers (use helper to make hot-reload safe)
+  _ensureAnimController();
+  _ensureSectionControllers();
+
+  // listen for scroll to trigger appear animations when sections enter viewport
+  scrollController.addListener(_onScroll);
 
     // Register local keys with controller so scroll helpers still work.
     controller.registerExploreKey(_exploreKey);
@@ -57,19 +127,70 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   void dispose() {
     scrollController.dispose();
+    _exploreScrollController.dispose();
+    _animController?.dispose();
     super.dispose();
+  }
+
+  void _ensureAnimController() {
+    if (_animController == null) {
+      _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          _animController?.forward();
+        } catch (_) {}
+      });
+    }
+  }
+
+  void _ensureSectionControllers() {
+    if (_hotDealsAnimController == null) {
+      _hotDealsAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    }
+    if (_aboutAnimController == null) {
+      _aboutAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    }
+    // check visibility once after init
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkSectionVisibility());
+  }
+
+  void _onScroll() {
+    _checkSectionVisibility();
+  }
+
+  void _checkSectionVisibility() {
+    try {
+      final RenderBox? hotBox = _hotDealsKey.currentContext?.findRenderObject() as RenderBox?;
+      final RenderBox? aboutBox = _aboutKey.currentContext?.findRenderObject() as RenderBox?;
+      final viewportHeight = MediaQuery.of(context).size.height;
+      if (hotBox != null && _hotDealsAnimController != null && _hotDealsAnimController!.status == AnimationStatus.dismissed) {
+        final hotDy = hotBox.localToGlobal(Offset.zero).dy;
+        if (hotDy < viewportHeight * 0.85) {
+          _hotDealsAnimController?.forward();
+        }
+      }
+      if (aboutBox != null && _aboutAnimController != null && _aboutAnimController!.status == AnimationStatus.dismissed) {
+        final aboutDy = aboutBox.localToGlobal(Offset.zero).dy;
+        if (aboutDy < viewportHeight * 0.85) {
+          _aboutAnimController?.forward();
+        }
+      }
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
+    // Ensure animation controller exists (hot-reload safe)
+    _ensureAnimController();
     final theme = Theme.of(context);
     // final isDark = theme.brightness == Brightness.dark; // unused
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive breakpoints
-    final isDesktop = screenWidth > 1200;
-    final isTablet = screenWidth > 768 && screenWidth <= 1200;
-    final isMobile = screenWidth <= 768;
+  // Treat small laptops (>= 992px) as desktop for a consistent layout
+  final isDesktop = screenWidth >= 992;
+  final isTablet = screenWidth > 768 && screenWidth < 992;
+  final isMobile = screenWidth <= 768;
 
     // Responsive padding
     final horizontalPadding = isDesktop ? 80.0 : isTablet ? 40.0 : 20.0;
@@ -100,19 +221,23 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 children: [
                   // Hero Section
                   _buildHeroSection(controller, theme, screenWidth),
-                  SizedBox(height: isDesktop ? 80 : isTablet ? 60 : 40),
+                  // Slightly increased gap after Hero for improved separation
+                  SizedBox(height: isDesktop ? 100 : isTablet ? 80 : 50),
 
                   // Explore Section
                   Container(key: _exploreKey, child: _buildExploreSection(controller, theme, screenWidth, context)),
-                  SizedBox(height: isDesktop ? 80 : isTablet ? 60 : 40),
+                  // Slightly increased gap after Explore
+                  SizedBox(height: isDesktop ? 100 : isTablet ? 80 : 50),
 
                   // Hot Deals Section
                   Container(key: _hotDealsKey, child: _buildHotDealsSection(controller, theme, screenWidth)),
-                  SizedBox(height: isDesktop ? 60 : isTablet ? 40 : 30),
+                  // Increased gap after Hot Deals
+                  SizedBox(height: isDesktop ? 80 : isTablet ? 60 : 40),
 
                   // About Section (placed under Hot Deals)
                   Container(key: _aboutKey, child: _buildAboutSection(theme, screenWidth)),
-                  SizedBox(height: isDesktop ? 40 : isTablet ? 30 : 20),
+                  // Small gap after About before footer
+                  SizedBox(height: isDesktop ? 60 : isTablet ? 40 : 30),
 
                   // Footer
                   Container(key: _footerKey, child: const BottomBarWidget()),
@@ -249,21 +374,22 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildHeroSection(WebHomeController controller, ThemeData theme, double screenWidth) {
-    final isDesktop = screenWidth > 1200;
-    final isTablet = screenWidth > 768 && screenWidth <= 1200;
-    final isMobile = screenWidth <= 768;
-    
+  final isDesktop = screenWidth >= 992;
+  final isTablet = screenWidth > 768 && screenWidth < 992;
+  final isMobile = screenWidth <= 768;
+    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 40.0 : 20.0;
+
     if (isMobile) {
+      // Keep previous compact mobile layout
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Mobile title
           Center(
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: theme.textTheme.titleLarge?.color,
                   height: 1.1,
@@ -274,29 +400,28 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                     alignment: PlaceholderAlignment.baseline,
                     baseline: TextBaseline.alphabetic,
                     child: ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [
-                            EventouryColors.electric_orange,
-                            EventouryColors.persimmon,
-                            EventouryColors.tangerine,
-                            EventouryColors.tangerine,
-                          ],
-                        ).createShader(
-                          Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              "celebrations",
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                  fontSize: 32,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          EventouryColors.electric_orange,
+                          EventouryColors.persimmon,
+                          EventouryColors.tangerine,
+                          EventouryColors.tangerine,
+                        ],
+                      ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'celebrations',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontSize: 28,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const Image(image: AssetImage("assets/home_screen/line.png")),
-                          ],
-                        )
+                          ),
+                          const Image(image: AssetImage('assets/home_screen/line.png')),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -304,7 +429,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          // Mobile images grid
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -322,96 +446,107 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       );
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Left Content
-        Expanded(
-          flex: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: isDesktop ? 60 : isTablet ? 48 : 36,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textTheme.titleLarge?.color,
-                    height: 1.1,
-                  ),
-                  children: [
-                    const TextSpan(text: 'Your concierge to\ncultures & '),
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.baseline,
-                      baseline: TextBaseline.alphabetic,
-                      child: ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [
-                              EventouryColors.electric_orange,
-                              EventouryColors.persimmon,
-                              EventouryColors.tangerine,
-                              EventouryColors.tangerine,
-                            ],
-                          ).createShader(
-                            Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                "celebrations",
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                    fontSize: isDesktop ? 60 : isTablet ? 48 : 36,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Image(image: AssetImage("assets/home_screen/line.png")),
-                            ],
-                          )
+    // Desktop/tablet: full-width hero with background image.
+    // Translate left and up and expand size to cover parent padding so the
+    // image reaches the page edges (top/right/left/bottom).
+    final verticalPadding = isDesktop ? 40.0 : isTablet ? 30.0 : 20.0;
+  // Add a small buffer to fullWidth so the image definitely reaches the right
+  // edge on different browsers / scrollbars. This avoids any visible white gap.
+    final extraBuffer = isDesktop ? 240.0 : isTablet ? 200.0 : 100.0;
+    final heroHeight = isDesktop ? 420.0 : isTablet ? 360.0 : 520.0;
+
+    return SizedBox(
+      width: double.infinity,
+      height: heroHeight,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Background image positioned with negative offsets so it
+          // overflows the hero on left/top/right/bottom and guarantees
+          // there is no white gap on the right.
+          Positioned(
+            left: -horizontalPadding,
+            top: -verticalPadding,
+            right: -extraBuffer,
+            bottom: -verticalPadding,
+            child: SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width + horizontalPadding * 2 + extraBuffer,
+                  height: heroHeight + verticalPadding * 2,
+                  child: Image.asset('assets/home_screen/BBali.jpg', fit: BoxFit.cover),
+                ),
+              ),
+            ),
+          ),
+
+          // Gradient overlay removed to avoid a heavy black background behind the hero text.
+          // Keeping an empty Positioned.fill preserves stacking order for the text.
+          Positioned.fill(child: Container()),
+
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isDesktop ? 700 : isTablet ? 600 : 340),
+                  child: RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: isDesktop ? 52 : isTablet ? 42 : 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.1,
                       ),
+                      children: [
+                        const TextSpan(text: 'Your concierge to\ncultures & '),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [
+                                EventouryColors.electric_orange,
+                                EventouryColors.persimmon,
+                                EventouryColors.tangerine,
+                                EventouryColors.tangerine,
+                              ],
+                            ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'celebrations',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontSize: isDesktop ? 52 : isTablet ? 42 : 30,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Image(image: AssetImage('assets/home_screen/line.png')),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
-        ),
-        
-        // Right Images
-        Expanded(
-          flex: 4,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    _heroImage('assets/onboarding_images/onboarding_1.jpeg', isDesktop ? 200 : 150, 16),
-                    const SizedBox(height: 16),
-                    _heroImage('assets/onboarding_images/onboarding_2.jpeg', isDesktop ? 140 : 100, 16),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  children: [
-                    _heroImage('assets/onboarding_images/onboarding_3.jpeg', isDesktop ? 140 : 100, 16),
-                    const SizedBox(height: 16),
-                    _heroImage('assets/onboarding_images/onboarding_4.jpeg', isDesktop ? 200 : 150, 16),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildExploreSection(WebHomeController controller, ThemeData theme, double screenWidth, BuildContext context) {
-    final isDesktop = screenWidth > 1200;
-    final isTablet = screenWidth > 768 && screenWidth <= 1200;
+  final isDesktop = screenWidth >= 992;
+  final isTablet = screenWidth > 768 && screenWidth < 992;
+  final isMobile = screenWidth <= 768;
     
     return Column(
       children: [
@@ -442,24 +577,72 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           ],
         ),
         SizedBox(height: isDesktop ? 40 : isTablet ? 30 : 20),
-        // Show all 13 categories in horizontal scroll
+        // Show all 13 categories in horizontal scroll with overlay arrows
         Container(
           height: isDesktop ? 240 : isTablet ? 220 : 200,
           child: Stack(
             children: [
               ListView.builder(
+                controller: _exploreScrollController,
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: controller.categories.length,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 itemBuilder: (context, index) {
                   return Container(
-                    width: screenWidth > 1200 ? 220 : screenWidth > 768 ? 200 : 180,
+                    width: screenWidth >= 992 ? 220 : screenWidth > 768 ? 200 : 180,
                     margin: const EdgeInsets.only(right: 16),
                     child: _buildCategoryCard(controller.categories[index], index, controller, theme, false, context),
                   );
                 },
               ),
+
+              // Left/Right arrow controls for desktop/tablet
+              if (!isMobile) ...[
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: () {
+                      final viewport = MediaQuery.of(context).size.width * 0.6;
+                      _exploreScrollController.animateTo(
+                        (_exploreScrollController.offset - viewport).clamp(0.0, _exploreScrollController.position.maxScrollExtent),
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    child: Container(
+                      width: 48,
+                      alignment: Alignment.center,
+                      color: Colors.transparent,
+                      child: Icon(Icons.chevron_left, size: 40, color: theme.iconTheme.color),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: () {
+                      final viewport = MediaQuery.of(context).size.width * 0.6;
+                      _exploreScrollController.animateTo(
+                        (_exploreScrollController.offset + viewport).clamp(0.0, _exploreScrollController.position.maxScrollExtent),
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut,
+                      );
+                    },
+                    child: Container(
+                      width: 48,
+                      alignment: Alignment.center,
+                      color: Colors.transparent,
+                      child: Icon(Icons.chevron_right, size: 40, color: theme.iconTheme.color),
+                    ),
+                  ),
+                ),
+              ],
+
               // Right fade indicator for scrolling
               Positioned(
                 right: 0,
@@ -504,87 +687,92 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       'VIP Protocol': 'assets/onboarding_images/onboarding_4.jpeg',
     };
 
-    // Get screen width for responsive sizing
+    // Responsive flags
     final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 1200;
+    final isTablet = screenWidth > 768 && screenWidth <= 1200;
+    final isSmallMobile = screenWidth <= 480;
 
-    // Dynamic padding based on screen width
-    double cardPadding;
-    if (screenWidth <= 480) {
-      cardPadding = 8; // Small phones
-    } else if (screenWidth <= 768) {
-      cardPadding = 10; // Large phones/small tablets
-    } else if (screenWidth <= 1024) {
-      cardPadding = 12; // Tablets
-    } else if (screenWidth <= 1440) {
-      cardPadding = 16; // Small desktop
-    } else {
-      cardPadding = 20; // Large desktop
-    }
+  // Card shadow/colors are handled by shared decoration
+
+    final imagePath = categoryImages[category] ?? 'assets/onboarding_images/onboarding_1.jpeg';
 
     return GestureDetector(
       onTap: () {
-        // Handle navigation or other actions here
+        // Navigate directly to the Subcategories screen for this category
+        Get.to(() => SubcategoriesScreen(categoryTitle: category));
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 8),
         height: isMobile ? 180 : double.infinity,
-        padding: EdgeInsets.all(cardPadding),
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
+        decoration: _sharedCardDecoration(theme, radius: 16),
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.15),
-              blurRadius: 16,
-              spreadRadius: 2,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Image container - takes most of the space
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  image: DecorationImage(
-                    image: AssetImage(categoryImages[category] ?? 'assets/onboarding_images/onboarding_1.jpeg'),
-                    fit: BoxFit.cover,
+          child: Stack(
+            children: [
+              // Background image
+              Positioned.fill(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              // Dark gradient to improve text contrast
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.black.withOpacity(0.45),
+                        Colors.black.withOpacity(0.18),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: isMobile ? 8 : 12),
-            // Text section - fixed height for text
-            SizedBox(
-              height: isMobile ? 40 : 44,
-              child: Center(
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    fontSize: isMobile ? 12 : 14,
-                    fontWeight: FontWeight.w600,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+
+              // Title & subtitle (top-left)
+              Positioned(
+                left: 16,
+                top: 16,
+                right: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category,
+                      style: TextStyle(
+                        color: Colors.white,
+                        // Slightly reduced and made more responsive so long names wrap/fit better
+                        fontSize: isDesktop ? 18 : isTablet ? 16 : isSmallMobile ? 13 : 14,
+                        fontWeight: FontWeight.w700,
+                        shadows: [const Shadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 4)],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    // Subtitle removed per design — keep title only on Explore cards
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              // (Removed) per design: no action button on card — title should be prominent and responsive
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHotDealsSection(WebHomeController controller, ThemeData theme, double screenWidth) {
-    final isDesktop = screenWidth > 1200;
-    final isTablet = screenWidth > 768 && screenWidth <= 1200;
-    final isMobile = screenWidth <= 768;
+  final isDesktop = screenWidth >= 992;
+  final isTablet = screenWidth > 768 && screenWidth < 992;
+  final isMobile = screenWidth <= 768;
     
     return Column(
       children: [
@@ -599,14 +787,19 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 color: theme.textTheme.titleLarge?.color,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'See All',
-                style: TextStyle(
-                  fontSize: isDesktop ? 16 : 14,
-                  color: EventouryColors.persimmon,
-                  fontWeight: FontWeight.w600,
+            _HoverScale(
+              child: TextButton(
+                onPressed: () {
+                  // Navigate to the full Hot Deals listing
+                  Get.to(() => const AllHotDealsScreen());
+                },
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    fontSize: isDesktop ? 16 : 14,
+                    color: EventouryColors.persimmon,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -614,25 +807,44 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
         ),
         SizedBox(height: isDesktop ? 40 : isTablet ? 30 : 20),
         Obx(() {
+          // Only show a preview of hot deals on the home page. Full list is available
+          // via the 'See All' link which navigates to AllHotDealsScreen.
+          final total = controller.hotDeals.length;
+          final displayCount = total > 3 ? 3 : total;
+
           if (isMobile) {
             return Column(
-              children: List.generate(controller.hotDeals.length, (index) {
+              children: List.generate(displayCount, (index) {
                 final deal = controller.hotDeals[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  child: _buildDealCard(deal, index, controller, theme, true),
+                final anim = CurvedAnimation(parent: _hotDealsAnimController!, curve: Interval((index * 0.08).clamp(0.0, 0.9), ((index * 0.08) + 0.45).clamp(0.0, 1.0), curve: Curves.easeOut));
+                return FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(anim),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: _buildDealCard(deal, index, controller, theme, true),
+                    ),
+                  ),
                 );
               }),
             );
           }
-          
+
           return Row(
-            children: List.generate(controller.hotDeals.length, (index) {
+            children: List.generate(displayCount, (index) {
               final deal = controller.hotDeals[index];
+              final anim = CurvedAnimation(parent: _hotDealsAnimController!, curve: Interval((index * 0.08).clamp(0.0, 0.9), ((index * 0.08) + 0.45).clamp(0.0, 1.0), curve: Curves.easeOut));
               return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  child: _buildDealCard(deal, index, controller, theme, false),
+                child: FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(anim),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      child: _buildDealCard(deal, index, controller, theme, false),
+                    ),
+                  ),
                 ),
               );
             }),
@@ -643,13 +855,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   Widget _buildAboutSection(ThemeData theme, double screenWidth) {
-    final isDesktop = screenWidth > 1200;
-    final isTablet = screenWidth > 768 && screenWidth <= 1200;
-    final isMobile = screenWidth <= 768;
+  final isDesktop = screenWidth >= 992;
+  final isTablet = screenWidth > 768 && screenWidth < 992;
+  final isMobile = screenWidth <= 768;
 
     final horizontalPadding = isDesktop ? 0.0 : 0.0;
 
-    return Container(
+  final aboutAnim = CurvedAnimation(parent: _aboutAnimController!, curve: const Interval(0.6, 1.0, curve: Curves.easeOut));
+
+    final aboutChild = Container(
       padding: EdgeInsets.symmetric(vertical: isDesktop ? 40 : isTablet ? 30 : 20, horizontal: horizontalPadding),
       child: isMobile
           ? Column(
@@ -660,20 +874,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse a sapien justo. Nulla facilisi tristique imperdiet. Nullam a placerat odio. Sed in ex augue. Aliquam porta consectetur lorem sit amet ultrices. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.',
+                  '''Welcome to Eventoury—your premier concierge for culture and celebrations in the heart of Bali! With our motto, "Your Concierge to Culture & Celebrations," we strive to make every moment of your travel unforgettable.
+
+At Eventoury, we go beyond traditional tourism and event management. We are committed to connecting you with a wide range of verified and secure service providers, ensuring a seamless and enjoyable experience during your stay. Whether you're looking to book tours, explore local attractions, hire guides, arrange transportation, or create special moments, we are your dedicated marketplace for all travel needs.''',
                   style: TextStyle(fontSize: 14, color: theme.textTheme.bodyMedium?.color, height: 1.6),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                EventouryElevatedButton(onPressed: () {}, child: const Text('Read more →')),
+                _HoverScale(child: EventouryElevatedButton(onPressed: () => Get.to(() => const AboutUsWebScreen()), child: const Text('Read more →'))),
                 const SizedBox(height: 20),
                 Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 18, offset: Offset(0, 8)),
-                    ],
-                  ),
+                  decoration: _sharedCardDecoration(theme, radius: 12),
                   child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset('assets/onboarding_images/onboarding_4.jpeg')),
                 ),
               ],
@@ -694,12 +905,12 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: 560),
                         child: Text(
-                          'At Eventoury, we believe travel is more than just visiting new places — it is about creating lasting memories. Our platform connects travelers with trusted vendors, offering curated packages that include breathtaking destinations, comfortable stays, and unforgettable experiences. We are dedicated to making trip planning simple, transparent, and stress-free. With easy booking, clear pricing, and detailed itineraries, travelers can focus on enjoying their journey while we handle the rest. Whether it’s a city tour, a cultural escape, or an adventure in the mountains, Eventoury is here to bring your dream trips to life.',
-                          style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium?.color, height: 1.6),
+                          '''Welcome to Eventoury—your premier concierge for culture and celebrations in the heart of Bali! With our motto, "Your Concierge to Culture & Celebrations," we strive to make every moment of your travel unforgettable. At Eventoury, we go beyond traditional tourism and event management. We are committed to connecting you with a wide range of verified and secure service providers, ensuring a seamless and enjoyable experience during your stay. Whether you're looking to book tours, explore local attractions, hire guides, arrange transportation, or create special moments, we are your dedicated marketplace for all travel needs.''',
+                            style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium?.color, height: 1.6),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      EventouryElevatedButton(onPressed: () {}, child: const Text('Read more →')),
+                      _HoverScale(child: EventouryElevatedButton(onPressed: () => Get.to(() => const AboutUsWebScreen()), child: const Text('Read more →'))),
                     ],
                   ),
                 ),
@@ -710,12 +921,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 Expanded(
                   flex: 4,
                   child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 22, offset: Offset(0, 12)),
-                      ],
-                    ),
+                    decoration: _sharedCardDecoration(theme, radius: 20),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: Image.asset('assets/onboarding_images/onboarding_4.jpeg', fit: BoxFit.cover),
@@ -723,8 +929,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                   ),
                 ),
               ],
-            ),
-    );
+              ),
+      );
+
+      return FadeTransition(
+        opacity: aboutAnim,
+        child: SlideTransition(
+          position: Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(aboutAnim),
+          child: aboutChild,
+        ),
+      );
   }
 
   Widget _buildDealCard(Map<String, dynamic> deal, int index, WebHomeController controller, ThemeData theme, bool isMobile) {
@@ -734,170 +948,166 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     final Color contentText = isDark ? Colors.white : Colors.black;
     final Color contentSubText = isDark ? Colors.white70 : Colors.black54;
 
-    // Add a surrounding container with layered shadows to give a stronger 3D effect.
-    final Color shadowPrimary = isDark ? Colors.black.withOpacity(0.6) : Colors.black.withOpacity(0.12);
-    final Color shadowSecondary = isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.06);
+  // Add a surrounding container with layered shadows to give a stronger 3D effect.
+  // Shadow handled by shared decoration below.
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: shadowPrimary, blurRadius: 20, offset: const Offset(0, 12)),
-          BoxShadow(color: shadowSecondary, blurRadius: 8, offset: const Offset(0, 6)),
-        ],
-      ),
-      child: Card(
-        color: cardBg,
-        elevation: 6,
-        shadowColor: isDark ? Colors.black : Colors.black.withOpacity(0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image
-          Container(
-            height: isMobile ? 180 : 200,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              image: DecorationImage(
-                image: AssetImage(deal['image']),
-                fit: BoxFit.cover,
+    return InkWell(
+      onTap: () => Get.to(() => DetailsScreen(title: deal['title'] ?? '', location: deal['location'] ?? '', rating: (deal['rating'] is num) ? (deal['rating'] as num).toDouble() : 0.0)),
+      child: Container(
+        decoration: _sharedCardDecoration(theme, radius: 20),
+        child: Card(
+          color: cardBg,
+          elevation: 6,
+          shadowColor: isDark ? Colors.black : Colors.black.withOpacity(0.08),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              Container(
+                height: isMobile ? 180 : 200,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  image: DecorationImage(
+                    image: AssetImage(deal['image']),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.3),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () => controller.toggleFavorite(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            deal['isFavorite'] ? Icons.favorite : Icons.favorite_border,
+                            color: deal['isFavorite'] ? Colors.red : Colors.grey,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.3),
+
+              // Content
+              Container(
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      deal['title'],
+                      style: TextStyle(
+                        fontSize: isMobile ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: contentText,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '${deal['beach']} • ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: contentSubText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (deal['wifi'])
+                          Text(
+                            'Free WiFi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: contentSubText,
+                            ),
+                          ),
                       ],
                     ),
-                  ),
-                ),
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: GestureDetector(
-                    onTap: () => controller.toggleFavorite(index),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        ...List.generate(5, (starIndex) {
+                          return Icon(
+                            starIndex < deal['rating'].floor() ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 16,
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            deal['rating'].toString(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: contentText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        deal['isFavorite'] ? Icons.favorite : Icons.favorite_border,
-                        color: deal['isFavorite'] ? Colors.red : Colors.grey,
-                        size: 20,
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, color: contentSubText, size: 16),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            deal['location'],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: contentSubText,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
-          // Content
-          Container(
-            padding: EdgeInsets.all(isMobile ? 16 : 20),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  deal['title'],
-                  style: TextStyle(
-                    fontSize: isMobile ? 16 : 18,
-                    fontWeight: FontWeight.bold,
-                    color: contentText,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        '${deal['beach']} • ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: contentSubText,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (deal['wifi'])
-                      Text(
-                        'Free WiFi',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: contentSubText,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    ...List.generate(5, (starIndex) {
-                      return Icon(
-                        starIndex < deal['rating'].floor() ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                        size: 16,
-                      );
-                    }),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        deal['rating'].toString(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: contentText,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, color: contentSubText, size: 16),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        deal['location'],
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: contentSubText,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
-    )
     );
   }
 

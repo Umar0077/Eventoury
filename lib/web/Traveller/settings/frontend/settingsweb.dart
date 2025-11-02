@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:eventoury/web/Traveller/settings/backend/settings_controller.dart';
+import 'package:eventoury/utils/theme/theme_controller.dart';
+import 'package:eventoury/utils/constants/colors.dart';
 import 'package:eventoury/web/top and Bottom bar/top bar web/topbarwidget.dart';
 // bottom bar removed for this screen
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,7 +16,7 @@ class SettingsWeb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  final controller = Get.put(SettingsController());
+  final themeCtrl = Get.find<ThemeController>();
   final theme = Theme.of(context);
   // If not signed in, show the sign-in prompt
   final user = FirebaseAuth.instance.currentUser;
@@ -75,7 +76,7 @@ class SettingsWeb extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Center(child: Obx(() => CircleAvatar(radius: isMobile ? 36 : 48, backgroundColor: controller.isDarkMode.value ? theme.primaryColor : theme.cardColor, backgroundImage: randomAvatar))),
+                            Center(child: Obx(() => CircleAvatar(radius: isMobile ? 36 : 48, backgroundColor: themeCtrl.isDark.value ? theme.primaryColor : theme.cardColor, backgroundImage: randomAvatar))),
                             const SizedBox(height: 12),
                             Center(child: Text('Huzaifa Noor', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: theme.textTheme.titleLarge?.color))),
                             const SizedBox(height: 4),
@@ -105,6 +106,10 @@ class SettingsWeb extends StatelessWidget {
                       _cardButton(context, icon: Icons.description_outlined, title: 'Terms and Condition', theme: theme, onTap: () {}),
                       const SizedBox(height: 8),
                       _cardButton(context, icon: Icons.privacy_tip_outlined, title: 'Privacy policy', theme: theme, onTap: () {}),
+
+                      const SizedBox(height: 12),
+                      // Appearance toggle placed under privacy policy as requested
+                      Obx(() => _cardToggle(context, icon: Icons.brightness_6, title: 'Appearance', theme: theme, value: themeCtrl.isDark.value, onChanged: (v) => themeCtrl.setDark(v))),
 
                       const SizedBox(height: 40),
                     ],
@@ -151,6 +156,24 @@ class SettingsWeb extends StatelessWidget {
           ],
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Row(children: [Icon(icon, color: theme.iconTheme.color), const SizedBox(width: 12), Text(title, style: TextStyle(color: theme.textTheme.bodyLarge?.color))]), Icon(Icons.open_in_new, color: theme.iconTheme.color)]),
+      ),
+    );
+  }
+
+  Widget _cardToggle(BuildContext context, {required IconData icon, required String title, required ThemeData theme, required bool value, required ValueChanged<bool> onChanged}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: Card(
+        color: theme.brightness == Brightness.dark ? theme.cardColor : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: SwitchListTile(
+          value: value,
+          onChanged: onChanged,
+          activeColor: EventouryColors.tangerine,
+          secondary: Icon(icon, color: theme.iconTheme.color),
+          title: Text(title, style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
+        ),
       ),
     );
   }

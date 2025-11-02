@@ -1,7 +1,11 @@
 import 'package:eventoury/web/Traveller/explore%20categories/frontend/explore_categories.dart';
+import 'package:eventoury/web/Traveller/AboutusSection/frontendAbout.dart';
 import 'package:eventoury/web/Traveller/home/backend/web_home_controller.dart';
 import 'package:eventoury/web/Traveller/settings/frontend/settingsweb.dart';
+import 'package:eventoury/web/Traveller/HotDeals/frontendHotDeals.dart';
+import 'package:eventoury/web/Traveller/ContactPage/frontendContact.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:get/get.dart';
 import 'package:eventoury/utils/constants/colors.dart';
 
@@ -22,7 +26,11 @@ class TopBarWidget extends StatelessWidget {
     final isDesktop = screenWidth > 1200;
     final isTablet = screenWidth > 768 && screenWidth <= 1200;
     final isMobile = screenWidth <= 768;
-    final horizontalPadding = isDesktop ? 80.0 : isTablet ? 24.0 : 20.0;
+  final horizontalPadding = isDesktop ? 80.0 : isTablet ? 24.0 : 20.0;
+  // Responsive spacing and logo sizes that scale smoothly across laptop sizes
+  final navSpacing = math.max(12.0, math.min(40.0, screenWidth * 0.03));
+  final logoHeight = math.max(28.0, math.min(48.0, screenWidth * 0.03));
+  final logoAreaWidth = math.max(120.0, math.min(260.0, screenWidth * 0.18));
 
     // Try to get a home controller for mobile menu state if available and no explicit callbacks provided
     WebHomeController? controller;
@@ -54,9 +62,9 @@ class TopBarWidget extends StatelessWidget {
                 )),
 
           if (isMobile)
-            Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Image.asset(isDark ? 'assets/app_logos/logo_5.png' : 'assets/app_logos/logo_4.png', height: 32)]))
+            Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Image.asset(isDark ? 'assets/app_logos/logo_5.png' : 'assets/app_logos/logo_4.png', height: logoHeight)]))
           else
-            SizedBox(width: isDesktop ? 200 : 150, child: Row(children: [Image.asset(isDark ? 'assets/app_logos/logo_5.png' : 'assets/app_logos/logo_4.png', height: isDesktop ? 40 : 32), const SizedBox(width: 8)])),
+            SizedBox(width: logoAreaWidth, child: Row(children: [Image.asset(isDark ? 'assets/app_logos/logo_5.png' : 'assets/app_logos/logo_4.png', height: logoHeight), const SizedBox(width: 8)])),
 
           if (!isMobile)
             // If a WebHomeController exists we bind to its activeNav observable so
@@ -81,13 +89,29 @@ class TopBarWidget extends StatelessWidget {
                             _navItem('Explore', active == 'Explore', theme, isDesktop, () {
                               ctrl.setActiveNav('Explore');
                               if (onNavTap != null) onNavTap!('Explore');
-                              ctrl.scrollToExplore();
+                              // Navigate to Explore categories screen for web
+                              Get.to(() => const ExploreCategoriesScreen());
                             }),
                             SizedBox(width: navSpacing),
                             _navItem('Hot Deals', active == 'Hot Deals', theme, isDesktop, () {
                               ctrl.setActiveNav('Hot Deals');
                               if (onNavTap != null) onNavTap!('Hot Deals');
-                              ctrl.scrollToHotDeals();
+                              // Navigate to All Hot Deals screen
+                              Get.to(() => const AllHotDealsScreen());
+                            }),
+                            SizedBox(width: navSpacing),
+                            _navItem('About', active == 'About', theme, isDesktop, () {
+                              ctrl.setActiveNav('About');
+                              if (onNavTap != null) onNavTap!('About');
+                              // Open About page
+                              Get.to(() => const AboutUsWebScreen());
+                            }),
+                            SizedBox(width: navSpacing),
+                            _navItem('Contact', active == 'Contact', theme, isDesktop, () {
+                              ctrl.setActiveNav('Contact');
+                              if (onNavTap != null) onNavTap!('Contact');
+                              // Navigate to Contact page
+                              Get.to(() => const ContactWebPage());
                             }),
                             SizedBox(width: navSpacing),
                             _navItem('Settings', active == 'Settings', theme, isDesktop, () {
@@ -96,23 +120,12 @@ class TopBarWidget extends StatelessWidget {
                               Get.to(() => const SettingsWeb());
                             }),
                             SizedBox(width: navSpacing),
-                            _navItem('About', active == 'About', theme, isDesktop, () {
-                              ctrl.setActiveNav('About');
-                              if (onNavTap != null) onNavTap!('About');
-                              ctrl.scrollToAbout();
-                            }),
-                            SizedBox(width: navSpacing),
-                            _navItem('Contact', active == 'Contact', theme, isDesktop, () {
-                              ctrl.setActiveNav('Contact');
-                              if (onNavTap != null) onNavTap!('Contact');
-                              ctrl.scrollToContact();
-                            }),
+                            _servicesMenu(theme, isDesktop),
                           ]);
                         });
                       })()
                     : (() {
                         // Responsive spacing for fallback navigation
-                        final navSpacing = isDesktop ? 40.0 : isTablet ? 20.0 : 15.0;
                         return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                           _navItem('Home', activeItem == 'Home', theme, isDesktop, () {
                               if (onNavTap != null) onNavTap!('Home');
@@ -135,17 +148,21 @@ class TopBarWidget extends StatelessWidget {
                           }),
                           SizedBox(width: navSpacing),
                           _navItem('Hot Deals', activeItem == 'Hot Deals', theme, isDesktop, () {
-                              if (onNavTap != null) onNavTap!('Hot Deals');
-                            if (controller != null) {
-                              controller.scrollToHotDeals();
-                            } else {
-                              // No separate route implemented; fallback to home then scroll
-                              if (Get.currentRoute != '/WebHomeScreen') {
-                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToHotDeals': true});
-                              } else {
-                                // already on home
-                              }
-                            }
+                            if (onNavTap != null) onNavTap!('Hot Deals');
+                            // Navigate to All Hot Deals screen
+                            Get.to(() => const AllHotDealsScreen());
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('About', activeItem == 'About', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('About');
+                            // Always navigate to the About page
+                            Get.to(() => const AboutUsWebScreen());
+                          }),
+                          SizedBox(width: navSpacing),
+                          _navItem('Contact', activeItem == 'Contact', theme, isDesktop, () {
+                            if (onNavTap != null) onNavTap!('Contact');
+                            // Open dedicated Contact page
+                            Get.to(() => const ContactWebPage());
                           }),
                           SizedBox(width: navSpacing),
                           _navItem('Settings', activeItem == 'Settings', theme, isDesktop, () {
@@ -153,28 +170,7 @@ class TopBarWidget extends StatelessWidget {
                             Get.to(() => const SettingsWeb());
                           }),
                           SizedBox(width: navSpacing),
-                          _navItem('About', activeItem == 'About', theme, isDesktop, () {
-                            if (onNavTap != null) onNavTap!('About');
-                            if (controller != null) {
-                              controller.scrollToAbout();
-                            } else {
-                              // Navigate to home and request scroll to About after navigation
-                              if (Get.currentRoute != '/WebHomeScreen') {
-                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToAbout': true});
-                              }
-                            }
-                          }),
-                          SizedBox(width: navSpacing),
-                          _navItem('Contact', activeItem == 'Contact', theme, isDesktop, () {
-                            if (onNavTap != null) onNavTap!('Contact');
-                            if (controller != null) {
-                              controller.scrollToContact();
-                            } else {
-                              if (Get.currentRoute != '/WebHomeScreen') {
-                                Get.offAllNamed('/WebHomeScreen', arguments: {'scrollToContact': true});
-                              }
-                            }
-                          }),
+                          _servicesMenu(theme, isDesktop),
                         ]);
                       })()), 
 
@@ -212,6 +208,37 @@ class TopBarWidget extends StatelessWidget {
           color: color
         )
       )
+    );
+  }
+
+  Widget _servicesMenu(ThemeData theme, bool isDesktop) {
+    final items = [
+      'Tailored Tours & Experiences',
+      'Activities',
+      'Transport Rentals',
+      'Guides of Your Choice',
+      'Event Management',
+      'Wellness & Fitness',
+      'Medical Assistance',
+      'Protocol Arrivals',
+    ];
+
+    return PopupMenuButton<String>(
+      tooltip: 'Services',
+      offset: const Offset(0, 40),
+      color: theme.scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) {
+        // Default behaviour: just show a brief snackbar. Replace with navigation if needed.
+        Get.snackbar('Service', value, backgroundColor: theme.scaffoldBackgroundColor.withOpacity(0.95), colorText: theme.textTheme.bodyLarge?.color ?? Colors.white);
+      },
+      itemBuilder: (context) => items
+          .map((s) => PopupMenuItem<String>(
+                value: s,
+                child: Text(s, style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
+              ))
+          .toList(),
+      child: Row(children: [Text('Services', style: TextStyle(fontSize: isDesktop ? 16 : 14, fontWeight: FontWeight.w500, color: theme.textTheme.bodyLarge?.color)), const SizedBox(width: 6), Icon(Icons.arrow_drop_down, color: theme.iconTheme.color)]),
     );
   }
 }

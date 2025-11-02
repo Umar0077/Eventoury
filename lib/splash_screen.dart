@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -19,10 +20,12 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
   late AnimationController _logoController;
   late AnimationController _fadeController;
   late AnimationController _scaleController;
+  late AnimationController _dotsController;
 
   late Animation<double> _logoAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  late List<Animation<double>> _dotAnimations;
 
   @override
   void initState() {
@@ -31,6 +34,12 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     // Initialize animation controllers
     _logoController = AnimationController(
       duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
+    // Dots controller - repeats to create toggling/pulsing effect
+    _dotsController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
@@ -49,6 +58,19 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
       CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
 
+    // Create three staggered animations for the dots (0..1 scale)
+    _dotAnimations = List.generate(3, (index) {
+      final start = index * 0.15;
+      final end = start + 0.55;
+      return TweenSequence<double>([
+        TweenSequenceItem(tween: Tween(begin: 0.6, end: 1.0).chain(CurveTween(curve: Curves.easeOut)), weight: 50),
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.6).chain(CurveTween(curve: Curves.easeIn)), weight: 50),
+      ]).animate(CurvedAnimation(
+        parent: _dotsController,
+        curve: Interval(start.clamp(0.0, 1.0), end.clamp(0.0, 1.0), curve: Curves.easeInOut),
+      ));
+    });
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -64,8 +86,9 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
   void _startAnimations() async {
     // Start logo rotation and scale
-    _logoController.forward();
-    _scaleController.forward();
+  _logoController.forward();
+  _scaleController.forward();
+  _dotsController.repeat();
 
     // Start fade animation after a short delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -123,6 +146,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     _logoController.dispose();
     _fadeController.dispose();
     _scaleController.dispose();
+    _dotsController.dispose();
     super.dispose();
   }
 
@@ -133,16 +157,30 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Custom "e" Logo
+            // Custom "e" Logo with left-right oscillation (decaying) while loading
             AnimatedBuilder(
-              animation: _logoAnimation,
+              animation: Listenable.merge([_logoController, _scaleController]),
               builder: (context, child) {
-                return Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: SizedBox(
-                    width: 250,
-                    height: 250,
-                    child: Image.asset('assets/app_logos/logo.png'),
+                // _logoAnimation.value goes from 0..1 over duration.
+                // We compute a decaying oscillation using sine so the logo swings left-right and then settles upright.
+                final t = _logoAnimation.value.clamp(0.0, 1.0);
+                // number of oscillation cycles during the animation
+                const cycles = 3.0;
+                // max amplitude in radians (~18 degrees)
+                const maxAmplitude = 0.32;
+                // decaying envelope so it straightens at the end
+                final envelope = (1.0 - t);
+                final angle = math.sin(t * cycles * 2.0 * math.pi) * maxAmplitude * envelope;
+
+                return Transform.rotate(
+                  angle: angle,
+                  child: Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: SizedBox(
+                      width: 250,
+                      height: 250,
+                      child: Image.asset('assets/app_logos/logo.png'),
+                    ),
                   ),
                 );
               },
@@ -150,23 +188,32 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
             const SizedBox(height: 80),
 
-            // Three dots loading indicator
+            // Three dots loading indicator with staggered toggle/pulse
             AnimatedBuilder(
-              animation: _fadeAnimation,
+              animation: Listenable.merge([_fadeController, _dotsController]),
               builder: (context, child) {
                 return Opacity(
                   opacity: _fadeAnimation.value,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(3, (index) {
-                      return AnimatedContainer(
-                        duration: Duration(milliseconds: 600),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B35),
-                          shape: BoxShape.circle,
+                      final scale = _dotAnimations[index].value;
+                      final opacity = ((scale - 0.6) / (1.0 - 0.6)).clamp(0.0, 1.0);
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: Opacity(
+                            opacity: opacity,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF6B35),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     }),
