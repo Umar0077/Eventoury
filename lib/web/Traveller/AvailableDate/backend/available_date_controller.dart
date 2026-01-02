@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../../booking/frontend/booking.dart';
+import '../../booking/frontend/booking.dart':
 
 class AvailableDateController extends GetxController {
   // Selected date
